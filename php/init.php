@@ -6,9 +6,9 @@ date_default_timezone_set('Europe/London');
 $GLOBALS['config'] = array(
 	'mysql' => array(
 		'host' => '10.103.109.84\cloud,1500',
-		'username' => 'XCP_user',
+		'username' => 'WSCRAPE_user',
 		'password' => 'Password1',
-		'db' => 'UAT-XCP'
+		'db' => 'UAT-WSCRAPE'
 	),
 	'remember' => array(
 		'cookie_name' => 'hash',
