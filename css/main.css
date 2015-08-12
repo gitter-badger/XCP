@@ -4,26 +4,26 @@ body {
 }
 
 .navbar-default .navbar-brand {
-//    color: #FFF;
+    color: #FFF;
 }
 
 .navbar {
   margin-bottom: 20px;
-//  background-color: #F1AD71;
+  background-color: #F1AD71;
 }
 
 .navbar-default .navbar-nav > .active > a,
 .navbar-default .navbar-nav > .active > a:hover,
 .navbar-default .navbar-nav > .active > a:focus {
-//  color: #555;
-//  background-color: #FB7A09;
+  color: #555;
+  background-color: #FB7A09;
 }
 
 .navbar-default .navbar-nav > .open > a,
 .navbar-default .navbar-nav > .open > a:hover,
 .navbar-default .navbar-nav > .open > a:focus {
-//  color: #555;
-//  background-color: #FB7A09;
+  color: #555;
+  background-color: #FB7A09;
 }
 
 .lading-panel {

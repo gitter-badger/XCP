@@ -9,10 +9,8 @@
     <meta name="author" content="">
     <link rel="shortcut icon" href="favicon.ico">
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
-  <!--
   <script src="http://d3js.org/d3.v3.min.js"></script>
   <script src="http://dimplejs.org/dist/dimple.v2.1.2.min.js"></script>
-    -->
     <title>XCP Web</title>
 
     <!-- Bootstrap core CSS -->

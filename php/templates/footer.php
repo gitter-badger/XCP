@@ -13,6 +13,9 @@
 	<!-- DataTables JS -->
 	<script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.5/js/jquery.dataTables.js"></script>
 	<script type="text/javascript" charset="utf8" src="js/dataTables.bootstrap.js"></script> 
+	<script type="text/javascript" charset="utf8" src="js/jquery.color.js"></script> 
+
+	
 	<script src="js/xcp.js"></script>
 	<script type="text/javascript" charset="utf8" src="js/jquery.timeago.js"></script>
 </html>

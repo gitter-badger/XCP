@@ -4,6 +4,14 @@
 		"selected_items":
 		[
 			[
+				"it",
+				"items"
+			],
+			[
+				"pipel",
+				"pipelinesInUse"
+			],
+			[
 				"stageS",
 				"stageSplitTo"
 			],
@@ -164,38 +172,55 @@
 			}
 		},
 		{
-			"file": "php/templates/header.php",
-			"settings":
-			{
-				"buffer_size": 1365,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "js/activity.js",
-			"settings":
-			{
-				"buffer_size": 4979,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"contents": "<?php \n\nrequire(\"../php/init.php\");\n\n$db = DB::getInstance();\n$type = Input::get('type');\n$act = Input::get('act');\n$uid = Input::get('uid');\n\n$outArray = array();\n\nswitch ($type) {\n	case 'mine':\n		$sql = \"SELECT DISTINCT mainData.*, XCPID, USERS.id, USERS.name_first, USERS.name_last, USERS.username, ACT_STATUS_2.ACT + ':' +  ACT_STATUS_2.STATUS as status, ACT_STATUS_2.DESCRIPTION statusDescription, ACT_STATUS_2.name as statusName, AUDIT.allocatedOn DATE, AUDIT.ACT, AUDIT.STATUS\n				FROM mainData\n				OUTER APPLY (SELECT TOP 1 * FROM ACT_AUDIT WHERE XCPID = mainData.XCP_ID order by id desc) AUDIT\n				LEFT JOIN USERS ON USERS.id = AUDIT.allocatedTo\n				LEFT JOIN ACT_STATUS_2 on ACT_STATUS_2.status = AUDIT.STATUS AND ACT_STATUS_2.act = AUDIT.ACT\n				WHERE AUDIT.ACT = \".$act.\" AND AUDIT.XCPID IS NOT NULL AND allocatedTo IS NOT NULL\";\n\n		if(Input::get('uid') != 0)\n			$sql .= \" AND allocatedTo = \" . Input::get('uid');\n\n		if(Input::get('feed') != 0)\n			$sql .= \" AND feed_id = \" . Input::get('feed');\n\n		if(Input::get('stream') != 0)\n			$sql .= \" AND stream_id = \" . Input::get('stream');\n\n		break;\n	\n	default:\n		$sql = \"SELECT DISTINCT mainData.*, USERS.*, ACT_STATUS_2.ACT + ':' +  ACT_STATUS_2.STATUS as status, ACT_STATUS_2.name as statusName, ACT_STATUS_2.DESCRIPTION statusDescription, AUDIT.*\n				FROM mainData\n				OUTER APPLY (SELECT TOP 1 * FROM ACT_AUDIT WHERE XCPID = mainData.XCP_ID order by id desc) AUDIT\n				LEFT JOIN USERS ON USERS.id = AUDIT.USER_ID\n				LEFT JOIN ACT_STATUS_2 on ACT_STATUS_2.status = AUDIT.STATUS AND ACT_STATUS_2.act = AUDIT.ACT\n				WHERE AUDIT.ACT = \".$act.\" AND AUDIT.XCPID IS NOT NULL AND allocatedTo IS NULL\";\n\n		if(Input::get('feed') != 0)\n			$sql .= \" AND feed_id = \" . Input::get('feed');\n\n		if(Input::get('stream') != 0)\n			$sql .= \" AND stream_id = \" . Input::get('stream');\n\n		break;\n}\n\n$data = $db->query($sql);					\n$results = $data->results();\n\n	foreach($results as $result) {\n		//$actXcpid = new Activity($result->XCPID);\n		switch ($type) {\n			$actXcpid = new Activity($result->XCPID);\n			case 'mine':\n				$form = '<div class=\"dropdown\">\n						  <button class=\"btn btn-success btn-sm dropdown-toggle pull-right\" type=\"button\" id=\"actionMenu\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"true\">\n						    Select stage\n						    <span class=\"caret\"></span>\n						  </button>\n						  <ul class=\"dropdown-menu dropdown-menu-right\" aria-labelledby=\"actionMenu\">\n						   <li class=\"dropdown-header\">Current stage</li>\n							<li class=\"disabled\"><a href=\"#\">' . $result->statusName . '</a></li>\n						  <li role=\"separator\" class=\"divider\"></li>\n						  <li class=\"dropdown-header\">Select next stage</li>';\n				\n				foreach ($actXcpid->getActRules() as $key => $value) {\n					$estString = \"'$result->XCPID','$key'\";\n					$form .= '<li><a href=\"#\" onclick=\"changeStage('.$estString.')\" title=\"'.$key.'\">'. $value .'</a></li>';\n				}		  \n\n			\n				$form .= '<li role=\"separator\" class=\"divider\"></li>';\n				$form .= '<li><a href=\"#\" onclick=\"unassign(\\''.$result->XCPID.'\\')\">Unclaim item</a></li>';\n				$form .='</ul></div>';\n\n\n				break;\n			default:\n				$form = '<button id=\"'.$result->XCPID.'\" href=\"#\" class=\"btn btn-warning btn-sm pull-right\" onclick=\"claim('.$result->XCPID.');\">CLAIM</button>';\n				break;\n		}\n		if($result->id == 0){\n			$userPrint = \"XCP\";\n		} else {\n			$userPrint = ucfirst($result->name_first) . \" \" . ucfirst($result->name_last);\n		}\n		$outArray[] = array(\n            		'<a target=\"details\" title=\"View info for ' . $result->XCPID . ' (' . $result->material_id . ')\" href=\"item.php?xcpid=' . $result->XCPID . '\">' . $result->material_id . '</a>',\n            		'<span title=\"'. $result->materialDescription .'\">' . concatTitle($result->materialDescription,20) . '</span>',\n            		$result->projectType,\n            		'<span title=\"' . wordwrap($result->materialTitle, 200, \"\\n\") . '\">' . concatTitle($result->materialTitle, 30) . '</span>',\n		           	$userPrint,\n					'<time class=\"timeago\" title=\"' . $result->DATE . '\" datetime=\"' . $result->DATE . '\">' . $result->DATE . '</time>',\n					$result->pageCount,\n            		$result->stream_id . ' (' . $result->feed_name . ')',\n            		'<span title=\"' . wordwrap($result->statusDescription, 200, \"\\n\") . '\">' . $result->status . \" - \" . $result->statusName . \"</span>\",\n            		$form\n		);\n	} \n\n$response = array(\n  'aaData' => $outArray,\n  'iTotalRecords' => count($outArray),\n  'iTotalDisplayRecords' => count($outArray)\n);\n\nheader(\"Content-type: application/json\");\nprint(json_encode($response));\n\n?>",
 			"file": "data/activity.data.php",
-			"file_size": 4628,
-			"file_write_time": 130832399212686948,
 			"settings":
 			{
-				"buffer_size": 4565,
+				"buffer_size": 4518,
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"file": "data/activity.data.test.php",
+			"contents": "<?php\n\nrequire(\"../php/init.php\");\n\n// Config\n// TODO: Move out of this file\n//ftp\n$ftp_server = \"ftp.hugatramp.com\"; \n$ftp_user_name = \"xcptest@hugatramp.com\"; \n$ftp_user_pass = \"xcpTest\";\n//directories\n$dateFile = '../toSend/' . date(\"Ymd\");\n$date = date(\"Y-m-d\");\n$itemDir = '../items';\n//get items at the activity with stage...\n$items = Activity::showAtStage(10,20);\nprint_r($items);\n\n//naming config\n$namingArray = array(	1 => 	array(	\"name\" => \"BSI-01-CONV-PDF-BSISDS-\",\n										\"Conversion_Type\" => \"CONV\", \n										\"Source_File_Type_1\" => \"PDF\", \n										\"Source_File_Type_2\" => \"N/A\", \n										\"Output_File_Type\" => \"BSISDS\"\n								),\n						2 =>	array(	\"name\" => \"BSI-02-CONV-PDF-ISOSTS-\", \n										\"Conversion_Type\" => \"CONV\", \n										\"Source_File_Type_1\" => \"PDF\", \n										\"Source_File_Type_2\" => \"N/A\", \n										\"Output_File_Type\" => \"ISOSTS\"\n								),\n						3 =>	array(	\"name\" => \"BSI-03-TRANS-\", \n										\"Conversion_Type\" => \"TRANS\", \n										\"Source_File_Type_1\" => \"N/A\", \n										\"Source_File_Type_2\" => \"N/A\", \n										\"Output_File_Type\" => \"N/A\"\n								),\n						4 =>	array(	\"name\" => \"BSI-04-CAPT-PDF-ISOSTS-\", \n										\"Conversion_Type\" => \"CAPT\", \n										\"Source_File_Type_1\" => \"PDF\", \n										\"Source_File_Type_2\" => \"ISOSTS\", \n										\"Output_File_Type\" => \"ISOSTS\"\n								),\n						5 =>	array(	\"name\" => \"BSI-05-EXTR-PDF-ISOSTS-\",\n										\"Conversion_Type\" => \"EXTR\", \n										\"Source_File_Type_1\" => \"PDF\", \n										\"Source_File_Type_2\" => \"N/A\", \n										\"Output_File_Type\" => \"ISOSTS\"\n								),\n						6 =>	array(	\"name\" => \"BSI-06-EXTR-PDF-ISOSTS-\", \n										\"Conversion_Type\" => \"EXTR\", \n										\"Source_File_Type_1\" => \"PDF\", \n										\"Source_File_Type_2\" => \"N/A\", \n										\"Output_File_Type\" => \"ISOSTS\"\n								),\n						7 =>	array(	\"name\" => \"BSI-07-CONS-PDF-ISOSTS-\", \n										\"Conversion_Type\" => \"CONS\", \n										\"Source_File_Type_1\" => \"PDF\", \n										\"Source_File_Type_2\" => \"ISOSTS\", \n										\"Output_File_Type\" => \"ISOSTS\"\n								),\n						8 =>	array(	\"name\" => \"BSI-08-TERM_MAP-\", \n										\"Conversion_Type\" => \"TERM_MAP\", \n										\"Source_File_Type_1\" => \"PDF\", \n										\"Source_File_Type_2\" => \"N/A\", \n										\"Output_File_Type\" => \"ISOSTS\"\n								)\n					);\n// CSV Headings\n$headers = array(	1  => \"XCP_ID\",\n					2  => \"Innodata_Batch_ID[zip filename]\",\n					3  => \"Batch_Return_Date\",\n					4  => \"Conversion_Pipeline\",\n					5  => \"Conversion_Type\",\n					6  => \"Document_Filename (UPI)\",\n					7  => \"Standard_ID\",\n					8  => \"Source_File_Type_1\",\n					9  => \"Source_File_Type_2\",\n					10 => \"Output_File_Type\",\n					11 => \"Page_count\",\n					12 => \"Document_Title\"\n				);\n\n\nif(count($items) > 0) {\n\n	// Create container\n	if(!file_exists ( $dateFile )) {\n		if (!mkdir($dateFile, 0777)) {\n			die('Failed to create folder...');\n		}\n	} else {\n		die('Already collated for today.');\n	}\n\n	// Create manifest file\n	$manifest = fopen($dateFile . \"/transmissionSheet_\" . $date . \".csv\", \"w\");\n	fwrite($manifest, implode(\",\", $headers) . \"\\n\");\n\n	// Look at all items to be sent\n	foreach ($items as $item) {\n\n		// Create pipeline folder, if it doesn't exist\n		echo 'ITEM:StreamId => ' . $item->stream_id . \"\\n\";\n		if(!file_exists ( $dateFile . \"/\" . $namingArray[$item->stream_id][\"name\"] . $date )){\n			if (!mkdir($dateFile . \"/\" . $namingArray[$item->stream_id][\"name\"] . $date, 0777)) {\n				die('Failed to create folder...');\n			}\n			$pipelinesInUse[] =  $item->stream_id;\n			echo \"Creating: \" . $dateFile . \"/\" . $namingArray[$item->stream_id][\"name\"] . $date . \"\\n\";\n			$foldersToDelete[] = $dateFile . \"/\" . $namingArray[$item->stream_id][\"name\"] . $date;\n		}\n\n		// Copy files to pipeline folder\n		if (!copy($itemDir . \"/\" . $item->file_location, $dateFile . \"/\" . $namingArray[$item->stream_id][\"name\"] . $date . \"/\" . $item->file_location)) {\n		   die(\"failed to copy \" . $itemDir . \"/\" . $item->file_location . \"...\");\n		}\n\n		// Manifest Stuff\n		$details = array(	$item->XCPID,\n							$namingArray[$item->stream_id][\"name\"] . $date,\n							\"\",\n							$item->stream_id,\n							$namingArray[$item->stream_id][\"Conversion_Type\"],\n							$item->material_id,\n							$item->materialDescription,\n							$namingArray[$item->stream_id][\"Source_File_Type_1\"],\n							$namingArray[$item->stream_id][\"Source_File_Type_2\"],\n							$namingArray[$item->stream_id][\"Output_File_Type\"],\n							$item->pageCount,\n							str_replace(\",\", \" \", $item->materialTitle)\n						);\n		fwrite($manifest, implode(\",\", $details) . \"\\n\");\n\n		// Move to next activity\n		echo \"UPDATING XCP FOR $item->XCPID \\n\";\n		#$item = new Activity($item->XCPID);\n		#$item->moveToActivity('20', '00', 0, false, \"Automatic item sending\");\n\n	} //End for each\n	fclose($manifest);\n	$filesToSend[] = array(\"/transmissionSheet_\" . $date . \".csv\", $dateFile . \"/transmissionSheet_\" . $date . \".csv\");\n\n	//ZIP Content\n	$piplineBatches = scandir($dateFile);\n	foreach ($piplineBatches as $piplineBatch) {\n		$filesToDelete = array();\n    	if ($piplineBatch === '.' or $piplineBatch === '..') continue;\n	    if (is_dir($dateFile . '/' . $piplineBatch)) {\n	    	$piplineItems = scandir($dateFile . '/' . $piplineBatch);\n	    	$zip = new ZipArchive();\n	    	echo 'crteating zip: '.$dateFile . '/' . $piplineBatch . '.zip'. \"\\n\";\n	    	if ($zip->open( $dateFile . '/' . $piplineBatch . '.zip', ZipArchive::CREATE | ZipArchive::OVERWRITE)!==TRUE) {\n			    exit(\"cannot open zip archive\");\n			}\n	    	foreach ( $piplineItems as $piplineItem ) {\n    			if ( $piplineItem === '.' or $piplineItem === '..') continue;\n	    		if ( !is_dir($dateFile . '/' . $piplineBatch . '/' . $piplineItem)) {\n	    			echo 'adding: ' . $dateFile . '/' . $piplineBatch . '/' . $piplineItem . ' to: ' . $piplineItem . \"\\n\";\n	    			$zip->addFile($dateFile . '/' . $piplineBatch . '/' . $piplineItem, $piplineItem);\n	    			$filesToDelete[] = $dateFile . '/' . $piplineBatch . '/' . $piplineItem;\n	    		}\n\n	    		$filesToSend[] = array($piplineBatch  . '.zip', $dateFile . '/' . $piplineBatch . '.zip');\n	    	}\n	    	$zip->close();\n    	}\n    	foreach ($filesToDelete as $file) {\n    		echo \"deleting: $file \\n\";\n		    unlink($file);\n		}\n	}\n	\n	print_r($foldersToDelete);\n	foreach ($foldersToDelete as $folder) {\n		echo \"deleting: $folder \\n\";\n		rmdir($folder);\n	}\n\n	//FTP Stuff\n	echo \"Starting FTP...\\n\";\n	$conn_id = ftp_connect($ftp_server); \n	$login_result = ftp_login($conn_id, $ftp_user_name, $ftp_user_pass); \n	ftp_pasv($conn_id, true);\n	if ((!$conn_id) || (!$login_result)) { \n        echo \"FTP connection has failed!\"; \n        echo \"Attempted to connect to $ftp_server for user $ftp_user_name\"; \n        exit; \n    }\n    //Create new dir on FTP server as todays date and go to it\n    ftp_mkdir($conn_id, $date);\n\n    // Upload files\n    foreach ($filesToSend as $key => $file) {\n    	echo \"uploading $file[0]\\n\";\n    #	ftp_put($conn_id,  $date . \"/\" . $file[0], $file[1] , FTP_BINARY);\n    }\n\n    // Email and shit\n    echo \"Who needs to be emailed:\\n\";\n\n    if(in_array('8', $pipelinesInUse)) {\n    	echo \"Starting some email for pl8\\n\";\n	    $mail = new PHPMailer;\n\n	    $mail->isSMTP();\n	    $mail->Host = '10.103.109.71';\n	    $mail->SMTPAuth = false;\n	    $mail->Port = 25;\n	    $mail->SMTPOptions = array (\n	        'ssl' => array(\n	            'verify_peer'  => false,\n	            'verify_peer_name'  => false,\n	            'allow_self_signed' => true));\n\n	    $mail->From = 'xcp_noreply@bsigroup.com';\n	    $mail->FromName = 'XCP';\n\n	    $mail->addAddress('JNemis@INNODATA.COM'); \n	    $mail->addAddress('LGoboy@INNODATA.COM');\n	    $mail->addAddress('content.operations@bsigroup.com'); \n\n	    $mail->isHTML(true); \n\n	    $mail->addAttachment($dateFile . \"/transmissionSheet_\" . $date . \".csv\", \"transmissionSheet_\" . $date . \".csv\");\n	    $mail->Subject = 'Innodata_Batch_Alert_' . $date;\n		$mail->Body    = '<p>Dear Innodata,</p>\n						  <p>This is to inform you that a new batch has been transferred to Innodata\\'s FTP site, for review for producing agreed XML outputs. Attached is a transmission sheet detailing each Material (identified by UPI) in the batch.</p>\n						  <p><strong>Please could you confirm receipt of these files and get back on an estimated turnaround time (TAT) and cost. Following this we will confirm whether work should proceed.</strong></p>\n						  <p><u>Notes:</u></p>\n						  <p>Directory path: /TO INNO/'. $date . '</p>\n						  <ul>\n						  <li>Materials are batched into zip files according to a single Conversion Pipeline (indicated in the Batch ID and the column Conversion_Pipeline in the transmission sheet)</li>\n						  <li>Each Material in the zip file needs to be processed through that Conversion Pipeline </li>\n						  <li>Details in the transmission sheet confirm the file types we have provided for each Material (see columns Source_File_Type) and the required XML output (based on Schema, see column Output_File_Type)</li>\n						  </ul>\n						  <p>Many thanks</p>\n						  ';\n\n		if(!$mail->send()) {\n		    echo 'Message could not be sent.';\n		    echo 'Mailer Error: ' . $mail->ErrorInfo;\n		    exit;\n		}\n\n    }\n\n    echo \"Starting some email for all pl\\n\";\n    $mail = new PHPMailer;\n\n    $mail->isSMTP();\n    $mail->Host = '10.103.109.71';\n    $mail->SMTPAuth = false;\n    $mail->Port = 25;\n    $mail->SMTPOptions = array (\n        'ssl' => array(\n            'verify_peer'  => false,\n            'verify_peer_name'  => false,\n            'allow_self_signed' => true));\n\n    $mail->From = 'xcp_noreply@bsigroup.com';\n    $mail->FromName = 'XCP';\n    \n    //foreach($to as $email) {\n    //	$mail->addAddress($email); \n    //}\n\n    $mail->addAddress('content.operations@bsigroup.com'); \n    $mail->addAddress('APradeep@innodata.com'); \n    $mail->addAddress('MMontano@INNODATA.COM'); \n    $mail->addAddress('LGoboy@INNODATA.COM\n\n    $mail->isHTML(true); \n\n    $mail->addAttachment($dateFile . \"/transmissionSheet_\" . $date . \".csv\", \"transmissionSheet_\" . $date . \".csv\");\n    $mail->Subject = 'Innodata_Batch_Alert_' . $date;\n	$mail->Body    = '<p>Dear Innodata,</p>\n					  <p>This is to inform you that a new batch has been transferred to Innodata\\'s FTP site, for review for producing agreed XML outputs. Attached is a transmission sheet detailing each Material (identified by UPI) in the batch.</p>\n					  <p><strong>Please could you confirm receipt of these files and get back on an estimated turnaround time (TAT) and cost. Following this we will confirm whether work should proceed.</strong></p>\n					  <p><u>Notes:</u></p>\n					  <p>Directory path: /TO INNO/'. $date . '</p>\n					  <ul>\n					  <li>Materials are batched into zip files according to a single Conversion Pipeline (indicated in the Batch ID and the column Conversion_Pipeline in the transmission sheet)</li>\n					  <li>Each Material in the zip file needs to be processed through that Conversion Pipeline </li>\n					  <li>Details in the transmission sheet confirm the file types we have provided for each Material (see columns Source_File_Type) and the required XML output (based on Schema, see column Output_File_Type)</li>\n					  </ul>\n					  <p>Many thanks</p>\n					  ';\n\n	if(!$mail->send()) {\n	    echo 'Message could not be sent.';\n	    echo 'Mailer Error: ' . $mail->ErrorInfo;\n	    exit;\n	}\n\n\n\n    // Delete files that have been uploaded\n    foreach ($filesToSend as $file) {\n    	echo \"deleting $file[0]\\n\";\n    	unlink($file[1]);\n    }\n\n    // Delete temp date folder\n    rmdir($dateFile);\n\n\n} else {\n	die ( 'No files to send.' );\n}\n",
+			"file": "exe/sendItems.php",
+			"file_size": 11808,
+			"file_write_time": 130834385304327573,
 			"settings":
 			{
-				"buffer_size": 4524,
+				"buffer_size": 11501,
 				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "test.php",
+			"settings":
+			{
+				"buffer_size": 610,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "flow.php",
+			"settings":
+			{
+				"buffer_size": 5993,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "js/flow.js",
+			"settings":
+			{
+				"buffer_size": 6026,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "data/activity.mapping.update.php",
+			"settings":
+			{
+				"buffer_size": 987,
+				"line_ending": "Windows",
+				"name": "<?php"
 			}
 		},
 		{
@@ -203,22 +228,6 @@
 			"settings":
 			{
 				"buffer_size": 3227,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "exe/sendItems.php",
-			"settings":
-			{
-				"buffer_size": 13520,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "exe/connTest.php",
-			"settings":
-			{
-				"buffer_size": 1208,
 				"line_ending": "Windows"
 			}
 		}
@@ -271,18 +280,20 @@
 	},
 	"expanded_folders":
 	[
-		"//10.103.109.37/xcp/WEB",
-		"//10.103.109.37/xcp/WEB/data",
-		"//10.103.109.37/xcp/WEB/exe",
-		"//10.103.109.37/xcp/WEB/js",
-		"//10.103.109.37/xcp/WEB/php",
-		"//10.103.109.37/xcp/WEB/php/templates"
+		"//10.103.109.37/xcp/WEB_UAT",
+		"//10.103.109.37/xcp/WEB_UAT/data",
+		"//10.103.109.37/xcp/WEB_UAT/exe",
+		"//10.103.109.37/xcp/WEB_UAT/js",
+		"//10.103.109.37/xcp/WEB_UAT/php",
+		"//10.103.109.37/xcp/WEB_UAT/php/classes",
+		"//10.103.109.37/xcp/WEB_UAT/php/functions",
+		"//10.103.109.37/xcp/WEB_UAT/php/templates",
+		"//10.103.109.37/xcp/WEB_UAT/reports",
+		"//10.103.109.37/xcp/WEB_UAT/toSend",
+		"//10.103.109.37/xcp/WEB_UAT/xcp"
 	],
 	"file_history":
 	[
-		"//10.103.109.37/xcp/WEB/flow.php",
-		"//10.103.109.37/xcp/WEB/js/flow.js",
-		"//10.103.109.37/xcp/WEB/data/activity.mapping.update.php",
 		"//10.103.109.37/xcp/WEB_UAT/php/classes/User.php",
 		"//10.103.109.37/xcp/WEB_UAT/php/functions/concat.php",
 		"//10.103.109.37/xcp/WEB_UAT/php/classes/DB.php",
@@ -359,7 +370,8 @@
 		"case_sensitive": false,
 		"find_history":
 		[
-			"inno",
+			"STREAM_ID",
+			"FILE_LOCATION",
 			"':');\n",
 			"e",
 			");\n",
@@ -401,6 +413,8 @@
 		"regex": false,
 		"replace_history":
 		[
+			"stream_id",
+			"file_location",
 			"Assigned",
 			"Count",
 			"Unassigned",
@@ -421,7 +435,7 @@
 	"groups":
 	[
 		{
-			"selected": 3,
+			"selected": 2,
 			"sheets":
 			[
 				{
@@ -437,8 +451,8 @@
 						"selection":
 						[
 							[
-								2079,
-								2079
+								3242,
+								3233
 							]
 						],
 						"settings":
@@ -447,34 +461,175 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 540.0,
+						"translation.y": 611.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 7,
+					"stack_index": 2,
 					"type": "text"
 				},
 				{
 					"buffer": 1,
-					"file": "php/templates/header.php",
-					"semi_transient": false,
+					"file": "data/activity.data.php",
+					"semi_transient": true,
 					"settings":
 					{
-						"buffer_size": 1365,
+						"buffer_size": 4518,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								932,
-								932
+								2655,
+								2668
 							]
 						],
 						"settings":
 						{
 							"syntax": "Packages/PHP/PHP.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 960.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "exe/sendItems.php",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 11501,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								652,
+								652
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/PHP/PHP.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 1800.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "test.php",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 610,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								610,
+								610
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/PHP/PHP.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "flow.php",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 5993,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/PHP/PHP.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 7,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "js/flow.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 6026,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 900.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "data/activity.mapping.update.php",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 987,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"auto_name": "<?php",
+							"syntax": "Packages/PHP/PHP.tmLanguage"
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
@@ -484,94 +639,7 @@
 					"type": "text"
 				},
 				{
-					"buffer": 2,
-					"file": "js/activity.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 4979,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								3728,
-								3739
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 1902.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 2,
-					"type": "text"
-				},
-				{
-					"buffer": 3,
-					"file": "data/activity.data.php",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 4565,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1932,
-								1932
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/PHP/PHP.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 1260.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 0,
-					"type": "text"
-				},
-				{
-					"buffer": 4,
-					"file": "data/activity.data.test.php",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 4524,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1972,
-								1972
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/PHP/PHP.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 828.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 1,
-					"type": "text"
-				},
-				{
-					"buffer": 5,
+					"buffer": 7,
 					"file": "php/classes/DB.php",
 					"semi_transient": false,
 					"settings":
@@ -591,65 +659,6 @@
 						{
 							"syntax": "Packages/PHP/PHP.tmLanguage",
 							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 5,
-					"type": "text"
-				},
-				{
-					"buffer": 6,
-					"file": "exe/sendItems.php",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 13520,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								13069,
-								13069
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/HTML/HTML.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 6720.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 3,
-					"type": "text"
-				},
-				{
-					"buffer": 7,
-					"file": "exe/connTest.php",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1208,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								830,
-								830
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/PHP/PHP.tmLanguage",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
@@ -700,7 +709,7 @@
 	"project": "xcp.sublime-project",
 	"replace":
 	{
-		"height": 106.0
+		"height": 66.0
 	},
 	"save_all_on_build": true,
 	"select_file":

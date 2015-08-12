@@ -50,51 +50,42 @@ $data = $db->query($sql);
 $results = $data->results();
 
 	foreach($results as $result) {
-		$actXcpid = new Activity($result->XCPID);
 		switch ($type) {
 			case 'mine':
-				$form = '<div class="dropdown">
-						  <button class="btn btn-success btn-sm dropdown-toggle pull-right" type="button" id="actionMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+
+				$form = '<div class="dropdown" id="BUTTON_'.$result->XCPID.'">';
+				$form .= '<button onclick="getInfo(\''.$result->XCPID.'\')" class="btn btn-success btn-sm dropdown-toggle pull-right" type="button" id="actionMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
 						    Select stage
 						    <span class="caret"></span>
 						  </button>
 						  <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="actionMenu">
 						   <li class="dropdown-header">Current stage</li>
-							<li class="disabled"><a href="#">' . $result->statusName . '</a></li>
+							<li class="disabled current"><a href="#"><i class="fa fa-bullseye"></i> ' . $result->statusName . '</a></li>
 						  <li role="separator" class="divider"></li>
-						  <li class="dropdown-header">Select next stage</li>';
-				
-				foreach ($actXcpid->getActRules() as $key => $value) {
-					$estString = "'$result->XCPID','$key'";
-					$form .= '<li><a href="#" onclick="changeStage('.$estString.')" title="'.$key.'">'. $value .'</a></li>';
-				}		  
-
-			
+						  <li class="dropdown-header">Select next stage</li><div style="margin-left: 1.5em;" class="nextContent"><i class="fa fa-spinner fa-pulse"></i></div>';
 				$form .= '<li role="separator" class="divider"></li>';
-				$form .= '<li><a href="#" onclick="unassign(\''.$result->XCPID.'\')">Unclaim item</a></li>';
-				$form .='</ul></div>';
-
-
+				$form .= '<li><a href="javascript:void(0)" onclick="unassign(\''.$result->XCPID.'\')"><i class="fa fa-undo"></i> Unclaim item</a></li>';
+				$form .='</div>';
 				break;
 			default:
-				$form = '<button id="'.$result->XCPID.'" href="#" class="btn btn-warning btn-sm pull-right" onclick="claim('.$result->XCPID.');">CLAIM</button>';
+				$form = '<button id="'.$result->XCPID.'" class="btn btn-warning btn-sm pull-right claimButton"><i class="fa fa-check-square-o"></i> CLAIM</button>';
 				break;
 		}
-		if($result->id == 0){
+		if($result->id == 0) {
 			$userPrint = "XCP";
 		} else {
 			$userPrint = ucfirst($result->name_first) . " " . ucfirst($result->name_last);
 		}
 		$outArray[] = array(
-            		'<a target="details" title="View info for ' . $result->XCPID . ' (' . $result->material_id . ')" href="item.php?xcpid=' . $result->XCPID . '">' . $result->material_id . '</a>',
+            		'<a id="row_'.$result->XCPID.'" target="details" title="View info for ' . $result->XCPID . ' (' . $result->material_id . ')" href="item.php?xcpid=' . $result->XCPID . '">' . $result->material_id . '</a>',
             		'<span title="'. $result->materialDescription .'">' . concatTitle($result->materialDescription,20) . '</span>',
             		$result->projectType,
             		'<span title="' . wordwrap($result->materialTitle, 200, "\n") . '">' . concatTitle($result->materialTitle, 30) . '</span>',
 		           	$userPrint,
 					'<time class="timeago" title="' . $result->DATE . '" datetime="' . $result->DATE . '">' . $result->DATE . '</time>',
 					$result->pageCount,
-            		$result->stream_id . ' (' . $result->feed_name . ')',
-            		'<span title="' . wordwrap($result->statusDescription, 200, "\n") . '">' . $result->status . " - " . $result->statusName . "</span>",
+            		'<span class="pipeline">' . $result->stream_id . '</span> (' . $result->feed_name . ')',
+            		'<span class="status" title="' . wordwrap($result->statusDescription, 200, "\n") . '"><span class="stage">' . $result->status . "</span> - " . $result->statusName . "</span>",
             		$form
 		);
 	} 

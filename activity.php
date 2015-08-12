@@ -18,13 +18,13 @@ if(Session::exists('home-danger')) {
 
 <?php
 }
-if($test = Activity::initRunning()) {
-  $datetime1 = new DateTime($test);
-  $datetime2 = new DateTime('now');
-  $interval = $datetime1->diff($datetime2);
-  Session::flash('home-danger','The init process is still running, it has been running since ' .$test . ' (That\'s: ' . $interval->format('%R%a days, %H hours, %i minutes') . '.)');
-  Redirect::to('index.php');
-}
+//if($test = Activity::initRunning()) {
+//  $datetime1 = new DateTime($test);
+//  $datetime2 = new DateTime('now');
+//  $interval = $datetime1->diff($datetime2);
+//  Session::flash('home-danger','The init process is still running, it has been running since ' .$test . ' (That\'s: ' . $interval->format('%R%a days, %H hours, %i minutes') . '.)');
+//  Redirect::to('index.php');
+//}
 ?>
 <div class="page-header">
 
@@ -77,11 +77,15 @@ if($test = Activity::initRunning()) {
 
 <ul class="nav nav-tabs" id="act_list">
 
+<li  title="Refresh Data" role="presentation" id="refreshButton">
+<a style="color:#777777;" href="javascript:void(0)" onclick="getCounts()" ondblclick="refresh()"><i class="fa fa-refresh"></i></a>
+</li>
+
 <?php
 $act = new Activity();
 foreach ($act->getAllActivities() as $key => $value) {
   echo '<li  title="' . $value->FULL_NAME . ' - '. $value->DESCRIPTION . '" class="act_list_item" role="presentation" id="' . str_pad($value->ID, 2, '0', STR_PAD_LEFT) . '">';
-  echo '<a href="#"  onclick="setActivity(' . str_pad($value->ID, 2, '0', STR_PAD_LEFT) . ');"><span class="label label-default">' . $value->SHORT_NAME . '</span>';
+  echo '<a href="javascript:void(0)"  onclick="setActivity(' . str_pad($value->ID, 2, '0', STR_PAD_LEFT) . ');"><span class="label label-default">' . $value->SHORT_NAME . '</span>';
   echo ' <span id="b_' . str_pad($value->ID, 2, '0', STR_PAD_LEFT) . '" class="label label-warning" style="display:none;">0</span>';
   echo ' <span id="m_' . str_pad($value->ID, 2, '0', STR_PAD_LEFT) . '" class="label label-success" style="display:none;">0</span></a></li>';
 }

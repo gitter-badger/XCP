@@ -2,6 +2,10 @@ div.dataTables_length label {
 	font-weight: normal;
 	text-align: left;
 	white-space: nowrap;
+	float: left;
+	padding-left: 8px;
+	padding-top: 9px;
+	padding-right: 35px;
 }
 
 div.dataTables_length select {
@@ -11,6 +15,7 @@ div.dataTables_length select {
 
 div.dataTables_filter {
 	text-align: right;
+	    float: left;
 }
 
 div.dataTables_filter label {
@@ -55,14 +60,16 @@ table.dataTable th {
 	-webkit-box-sizing: content-box;
 	-moz-box-sizing: content-box;
 	box-sizing: content-box;
+
 }
 
 
 table.dataTable {
 	clear: both;
 	margin-top: 6px !important;
-	margin-bottom: 6px !important;
+	margin-bottom: 0px !important;
 	max-width: none !important;
+	//border-bottom: 1px solid #C5BEBE;
 }
 
 table.dataTable thead .sorting,

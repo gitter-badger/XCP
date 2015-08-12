@@ -2,28 +2,19 @@
 
 require("../php/init.php");
 
-echo "\n***********************************\n";
-echo "************ + START + ************\n";
-echo "***********************************\n";
-
 // Config
 // TODO: Move out of this file
 //ftp
 $ftp_server = "ftp.hugatramp.com"; 
 $ftp_user_name = "xcptest@hugatramp.com"; 
 $ftp_user_pass = "xcpTest";
-
-#$ftp_server = "203.55.173.10"; 
-#$ftp_user_name = "FTP-BSI"; 
-#$ftp_user_pass = "PL4789mn";
-
 //directories
 $dateFile = '../toSend/' . date("Ymd");
 $date = date("Y-m-d");
 $itemDir = '../items';
 //get items at the activity with stage...
 $items = Activity::showAtStage(10,20);
-//print_r($items);
+print_r($items);
 
 //naming config
 $namingArray = array(	1 => 	array(	"name" => "BSI-01-CONV-PDF-BSISDS-",
@@ -93,24 +84,7 @@ $headers = array(	1  => "XCP_ID",
 
 if(count($items) > 0) {
 
-	//Check FTP Stuff
-	echo "\n**** CONNECTING TO FTP ****\n";
-	echo "***************************\n";
-	$conn_id = ftp_connect($ftp_server); 
-	$login_result = ftp_login($conn_id, $ftp_user_name, $ftp_user_pass); 
-	ftp_pasv($conn_id, true);
-	if ((!$conn_id) || (!$login_result)) { 
-        echo "!! FTP connection has failed!\n"; 
-        echo "!! Attempted to connect to $ftp_server for user $ftp_user_name\n"; 
-        die('Could not connect to FTP server.'); 
-    }
-    echo "** Conection made...\n";
-
-	echo "\n**** START DOING STUFF ****\n";
-	echo "***************************\n"; 
-	   
 	// Create container
-	echo "* Creating container: $dateFile\n";
 	if(!file_exists ( $dateFile )) {
 		if (!mkdir($dateFile, 0777)) {
 			die('Failed to create folder...');
@@ -120,38 +94,29 @@ if(count($items) > 0) {
 	}
 
 	// Create manifest file
-	echo "* Creating manifest file: " . $dateFile . "/transmissionSheet_" . $date . ".csv\n";
 	$manifest = fopen($dateFile . "/transmissionSheet_" . $date . ".csv", "w");
 	fwrite($manifest, implode(",", $headers) . "\n");
 
-	echo "\n** Create folders **\n";
-	echo "********************\n";
-	
 	// Look at all items to be sent
 	foreach ($items as $item) {
 
 		// Create pipeline folder, if it doesn't exist
-		echo "\nITEM => " . $item->xcp_id . " (" . $item->stream_id . ")\n";
+		echo 'ITEM:StreamId => ' . $item->stream_id . "\n";
 		if(!file_exists ( $dateFile . "/" . $namingArray[$item->stream_id]["name"] . $date )){
 			if (!mkdir($dateFile . "/" . $namingArray[$item->stream_id]["name"] . $date, 0777)) {
-				die('!! Failed to create folder...');
+				die('Failed to create folder...');
 			}
 			$pipelinesInUse[] =  $item->stream_id;
-			echo "    Creating ZIP container: " . $dateFile . "/" . $namingArray[$item->stream_id]["name"] . $date . "\n";
+			echo "Creating: " . $dateFile . "/" . $namingArray[$item->stream_id]["name"] . $date . "\n";
 			$foldersToDelete[] = $dateFile . "/" . $namingArray[$item->stream_id]["name"] . $date;
-		} else {
-			echo "    ZIP container already exists\n";
 		}
-		
+
 		// Copy files to pipeline folder
-		echo "    Putting: " . $itemDir . "/" . $item->file_location . "\n";
-		echo "     - INTO: " . $dateFile . "/" . $namingArray[$item->stream_id]["name"] . $date . "/" . $item->file_location ."\n";
 		if (!copy($itemDir . "/" . $item->file_location, $dateFile . "/" . $namingArray[$item->stream_id]["name"] . $date . "/" . $item->file_location)) {
-		   die("!! failed to copy " . $itemDir . "/" . $item->file_location . "...");
+		   die("failed to copy " . $itemDir . "/" . $item->file_location . "...");
 		}
 
 		// Manifest Stuff
-		echo "    Adding data to manifest...\n";
 		$details = array(	$item->XCPID,
 							$namingArray[$item->stream_id]["name"] . $date,
 							"",
@@ -168,18 +133,15 @@ if(count($items) > 0) {
 		fwrite($manifest, implode(",", $details) . "\n");
 
 		// Move to next activity
-		echo "    Updating item in XCP: " . $item->XCPID . "\n";
-		$item = new Activity($item->XCPID);
-		$item->moveToActivity('20', '00', 0, false, "Automatic item sending");
+		echo "UPDATING XCP FOR $item->XCPID \n";
+		#$item = new Activity($item->XCPID);
+		#$item->moveToActivity('20', '00', 0, false, "Automatic item sending");
 
 	} //End for each
-	echo "\n*** Closing manifest\n";
 	fclose($manifest);
 	$filesToSend[] = array("/transmissionSheet_" . $date . ".csv", $dateFile . "/transmissionSheet_" . $date . ".csv");
 
 	//ZIP Content
-	echo "\n***** ZIPPING CONTENT *****\n";
-	echo "***************************\n";
 	$piplineBatches = scandir($dateFile);
 	foreach ($piplineBatches as $piplineBatch) {
 		$filesToDelete = array();
@@ -187,58 +149,58 @@ if(count($items) > 0) {
 	    if (is_dir($dateFile . '/' . $piplineBatch)) {
 	    	$piplineItems = scandir($dateFile . '/' . $piplineBatch);
 	    	$zip = new ZipArchive();
-	    	echo "\n*** CREATING ZIP\n";
-	    	echo "     - " .$dateFile . '/' . $piplineBatch . '.zip'. "\n";
+	    	echo 'crteating zip: '.$dateFile . '/' . $piplineBatch . '.zip'. "\n";
 	    	if ($zip->open( $dateFile . '/' . $piplineBatch . '.zip', ZipArchive::CREATE | ZipArchive::OVERWRITE)!==TRUE) {
-			    exit("!! Cannot open zip archive");
+			    exit("cannot open zip archive");
 			}
-			echo "*** ADD FILES TO ZIP\n";
 	    	foreach ( $piplineItems as $piplineItem ) {
     			if ( $piplineItem === '.' or $piplineItem === '..') continue;
 	    		if ( !is_dir($dateFile . '/' . $piplineBatch . '/' . $piplineItem)) {
-	    			echo '    - ' . $dateFile . '/' . $piplineBatch . '/' . $piplineItem . "\n";
+	    			echo 'adding: ' . $dateFile . '/' . $piplineBatch . '/' . $piplineItem . ' to: ' . $piplineItem . "\n";
 	    			$zip->addFile($dateFile . '/' . $piplineBatch . '/' . $piplineItem, $piplineItem);
 	    			$filesToDelete[] = $dateFile . '/' . $piplineBatch . '/' . $piplineItem;
 	    		}
+
+	    		$filesToSend[] = array($piplineBatch  . '.zip', $dateFile . '/' . $piplineBatch . '.zip');
 	    	}
-	    	$filesToSend[] = array($piplineBatch  . '.zip', $dateFile . '/' . $piplineBatch . '.zip');
 	    	$zip->close();
     	}
-    	echo "*** DELETE FILES\n";
     	foreach ($filesToDelete as $file) {
-    		echo "    - $file \n";
+    		echo "deleting: $file \n";
 		    unlink($file);
 		}
 	}
-	echo "\n*** DELETE FOLDERS ****\n";
-	echo "************************\n";
+	
+	print_r($foldersToDelete);
 	foreach ($foldersToDelete as $folder) {
-		echo "    - $folder \n";
+		echo "deleting: $folder \n";
 		rmdir($folder);
 	}
 
-	echo "\n*** FTP CONTENT ****\n";
-	echo "************************\n";
+	//FTP Stuff
+	echo "Starting FTP...\n";
+	$conn_id = ftp_connect($ftp_server); 
+	$login_result = ftp_login($conn_id, $ftp_user_name, $ftp_user_pass); 
+	ftp_pasv($conn_id, true);
+	if ((!$conn_id) || (!$login_result)) { 
+        echo "FTP connection has failed!"; 
+        echo "Attempted to connect to $ftp_server for user $ftp_user_name"; 
+        exit; 
+    }
     //Create new dir on FTP server as todays date and go to it
-    echo "\n*** Create folder on FTP: $date\n";
-    ftp_mkdir($conn_id, 'To_INNO/' . $date);
-
-    #echo "*** Files to send.../n";
-    #print_r($filesToSend);
+    ftp_mkdir($conn_id, $date);
 
     // Upload files
-    echo "*** Uploading files...\n";
     foreach ($filesToSend as $key => $file) {
-    	echo "    - Uploading: $file[0]\n";
-    	ftp_put($conn_id, 'To_INNO/' . $date . "/" . $file[0], $file[1] , FTP_BINARY);
+    	echo "uploading $file[0]\n";
+    #	ftp_put($conn_id,  $date . "/" . $file[0], $file[1] , FTP_BINARY);
     }
 
     // Email and shit
-	echo "\n**** Starting Email ****\n";
-	echo "************************\n";
+    echo "Who needs to be emailed:\n";
 
     if(in_array('8', $pipelinesInUse)) {
-    	echo "** Sending email for pipeline 8...\n";
+    	echo "Starting some email for pl8\n";
 	    $mail = new PHPMailer;
 
 	    $mail->isSMTP();
@@ -254,10 +216,9 @@ if(count($items) > 0) {
 	    $mail->From = 'xcp_noreply@bsigroup.com';
 	    $mail->FromName = 'XCP';
 
-	    //$mail->addAddress('JNemis@INNODATA.COM'); 
-	    //$mail->addAddress('LGoboy@INNODATA.COM');
-	    //$mail->addAddress('content.operations@bsigroup.com'); 
-    	$mail->addAddress('ben.garside@bsigroup.com'); 
+	    $mail->addAddress('JNemis@INNODATA.COM'); 
+	    $mail->addAddress('LGoboy@INNODATA.COM');
+	    $mail->addAddress('content.operations@bsigroup.com'); 
 
 	    $mail->isHTML(true); 
 
@@ -281,11 +242,10 @@ if(count($items) > 0) {
 		    echo 'Mailer Error: ' . $mail->ErrorInfo;
 		    exit;
 		}
-		echo "** Sent.\n";
 
     }
 
-    echo "** Sending email for all other pipelines...\n";
+    echo "Starting some email for all pl\n";
     $mail = new PHPMailer;
 
     $mail->isSMTP();
@@ -305,11 +265,10 @@ if(count($items) > 0) {
     //	$mail->addAddress($email); 
     //}
 
-    //$mail->addAddress('content.operations@bsigroup.com'); 
-    //$mail->addAddress('APradeep@innodata.com'); 
-    //$mail->addAddress('MMontano@INNODATA.COM'); 
-    //$mail->addAddress('LGoboy@INNODATA.COM'); 
-    $mail->addAddress('ben.garside@bsigroup.com'); 
+    $mail->addAddress('content.operations@bsigroup.com'); 
+    $mail->addAddress('APradeep@innodata.com'); 
+    $mail->addAddress('MMontano@INNODATA.COM'); 
+    $mail->addAddress('LGoboy@INNODATA.COM
 
     $mail->isHTML(true); 
 
@@ -333,28 +292,19 @@ if(count($items) > 0) {
 	    echo 'Mailer Error: ' . $mail->ErrorInfo;
 	    exit;
 	}
-	echo "** Sent.\n";
 
-	echo "\n**** TIDY UP ****\n";
-	echo "*****************\n";
+
 
     // Delete files that have been uploaded
-	echo "** Delete files that have been uploaded\n";
     foreach ($filesToSend as $file) {
-    	echo "   - $file[0]\n";
+    	echo "deleting $file[0]\n";
     	unlink($file[1]);
     }
 
-    // Delete temp date folder#
-    echo "** Delete temp folder\n";
-    echo "   - $dateFile[0]\n";
+    // Delete temp date folder
     rmdir($dateFile);
 
 
 } else {
 	die ( 'No files to send.' );
 }
-
-	echo "\n*********************************\n";
-	echo "************ + END + ************\n";
-	echo "*********************************\n";

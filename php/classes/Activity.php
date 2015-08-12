@@ -89,12 +89,25 @@ class Activity {
 		return false;
 	}
 
-	public function getStatusDescription($status, $activity) {
-
-		$data = $this->_db->query("SELECT name FROM [ACT_STATUS_2] WHERE act = '$activity' AND status = '$status'");
-
+	public static function getStatusDescription($status, $activity) {
+		$db = DB::getInstance();
+		$sql = "SELECT name FROM [ACT_STATUS_2] WHERE act = '$activity' AND status = '$status'";
+		$data = $db->query($sql);
 		if($data->count()) {
 			return $data->first()->name;
+		} else {
+			return 'error';
+		}
+	}
+
+	public static function getStatusDescriptionDescription($status, $activity) {
+		$db = DB::getInstance();
+		$sql = "SELECT [description] FROM [ACT_STATUS_2] WHERE act = '$activity' AND status = '$status'";
+		$data = $db->query($sql);
+		if($data->count()) {
+			return $data->first()->description;
+		} else {
+			return 'error';
 		}
 	}
 
@@ -203,16 +216,43 @@ class Activity {
 		return 'No XCPID initalised';
 	}
 
-	public function maintainAssign($act,$stat) {
-		if($act && $stat){
-			$sql = "SELECT assign FROM ACT_MAPPING WHERE act_in = $act AND status_in = $stat";
-			$data = $this->_db->query($sql);
-			if($data->first()->assign == 1){
-				return true;
+
+	public static function maintainAssign($actFrom,$statFrom,$actTo,$statTo,$stream_id) {
+
+			$db = DB::getInstance();
+			$sql = "SELECT act_out, status_out, assign FROM ACT_MAPPING_VIEW WHERE act_in = '" . $actFrom . "' AND status_in = '" . $statFrom . "' AND pipeline_id = " . $stream_id;
+			$data = $db->query($sql);
+			if($data->count()) {
+				$return = $data->results();
+				$rulesArray = array();
+				foreach ($return as $value) {
+					if(is_numeric($value->status_out)){
+						if($value->status_out == $statTo && $value->act_out == $actTo) {
+							return $value->assign;
+						}
+					} elseif(substr($value->status_out,0,1) == "*") {
+						// All available at ACT
+						if($value->act_out == $actTo) {
+							return $value->assign;
+						}
+					}
+				}
+				return flase;
 			}
-			return false;	
+			return flase;
+	}
+
+	public static function maintainAssignment($act,$stat) {
+		$sql = "SELECT assign FROM ACT_MAPPING WHERE act_in = $act AND status_in = $stat";
+
+		$db = DB::getInstance();
+		$data = $db->query($sql);
+
+		if($data->first()->assign == 1){
+			return true;
 		}
-		return false;
+		return false;	
+
 	}
 
 	public function moveToActivity($activity = null, $status = null, $user = null, $strict = true, $comment = null) {
