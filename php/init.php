@@ -9,6 +9,10 @@ $GLOBALS['config'] = array(
 		'username' => 'WSCRAPE_user',
 		'password' => 'Password1',
 		'db' => 'UAT-WSCRAPE'
+		#'host' => 'CHI-PB3YT38',
+		#'username' => 'xcp_user',
+		#'password' => 'Password1',
+		#'db' => 'XCP-DEV'
 	),
 	'remember' => array(
 		'cookie_name' => 'hash',
@@ -20,15 +24,15 @@ $GLOBALS['config'] = array(
 	)
 );
 // Include Composer files..
-require 'E:/XCP/WEB_UAT/vendor/autoload.php';
+require  __DIR__ .'/../vendor/autoload.php';
 
 // Include all classes
 spl_autoload_register(function($class) {
-	require_once 'E:/XCP/WEB_UAT/php/classes/' . $class . '.php';
+	require_once __DIR__ .'/classes/' . $class . '.php';
 });
 
 // Include all functions
-foreach (glob("E:/XCP/WEB_UAT/php/functions/*.php") as $filename)
+foreach (glob(__DIR__ ."/functions/*.php") as $filename)
 {
     include_once $filename;
 }
