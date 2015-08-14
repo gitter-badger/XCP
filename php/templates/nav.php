@@ -15,7 +15,7 @@
         <li <?php echoActiveClassIfRequestMatches("activity"); ?>><a href="activity.php">Activity Tracker</a></li>
         
          <li class="dropdown">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Exclutions <span class="caret"></span></a>
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Exclusions <span class="caret"></span></a>
           <ul class="dropdown-menu">
             <li <?php echoActiveClassIfRequestMatches("addexclution"); ?>><a href="addexclution.php" >Exclude Content</a></li>
             <li <?php echoActiveClassIfRequestMatches("viewexclution"); ?>><a href="viewexclution.php" >View Excluded Content</a></li>
