@@ -11,7 +11,7 @@ $outArray = array();
 
 switch ($type) {
 	case 'mine':
-		$sql = "SELECT DISTINCT mainData.*, XCPID, USERS.id, USERS.name_first, USERS.name_last, USERS.username, ACT_STATUS_2.ACT + ':' +  ACT_STATUS_2.STATUS as status, ACT_STATUS_2.DESCRIPTION statusDescription, ACT_STATUS_2.name as statusName, AUDIT.allocatedOn DATE, AUDIT.ACT, AUDIT.STATUS
+		$sql = "SELECT DISTINCT mainData.*, XCPID, USERS.id, USERS.name_first, USERS.name_last, USERS.username, ACT_STATUS_2.ACT + ':' +  ACT_STATUS_2.STATUS as status, ACT_STATUS_2.DESCRIPTION statusDescription, ACT_STATUS_2.name as statusName, CONVERT(CHAR(23), AUDIT.allocatedOn, 126) DATE, AUDIT.ACT, AUDIT.STATUS
 				FROM mainData
 				OUTER APPLY (SELECT TOP 1 * FROM ACT_AUDIT WHERE XCPID = mainData.XCP_ID order by id desc) AUDIT
 				LEFT JOIN USERS ON USERS.id = AUDIT.allocatedTo
@@ -30,7 +30,7 @@ switch ($type) {
 		break;
 	
 	default:
-		$sql = "SELECT DISTINCT mainData.*, USERS.*, ACT_STATUS_2.ACT + ':' +  ACT_STATUS_2.STATUS as status, ACT_STATUS_2.name as statusName, ACT_STATUS_2.DESCRIPTION statusDescription, AUDIT.*
+		$sql = "SELECT DISTINCT mainData.*, USERS.*, ACT_STATUS_2.ACT + ':' +  ACT_STATUS_2.STATUS as status, ACT_STATUS_2.name as statusName, ACT_STATUS_2.DESCRIPTION statusDescription, CONVERT(CHAR(23), AUDIT.allocatedOn, 126) DATE, AUDIT.ACT, AUDIT.STATUS
 				FROM mainData
 				OUTER APPLY (SELECT TOP 1 * FROM ACT_AUDIT WHERE XCPID = mainData.XCP_ID order by id desc) AUDIT
 				LEFT JOIN USERS ON USERS.id = AUDIT.USER_ID
