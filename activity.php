@@ -1,17 +1,17 @@
 <?php
-require_once('php/templates/header.php');
-if(!$user->isLoggedIn()){
-    Redirect::to('login.php?nexturl=activity.php');
+require_once 'php/templates/header.php';
+if (!$user->isLoggedIn()) {
+	Redirect::to('login.php?nexturl=activity.php');
 }
-if(Session::exists('home-success')) {
-?>
+if (Session::exists('home-success')) {
+	?>
       <div class="alert alert-success" role="alert">
         <strong>Well done!</strong> <?php echo Session::flash('home-success');?>
       </div>
 <?php
 }
-if(Session::exists('home-danger')) {
-?>
+if (Session::exists('home-danger')) {
+	?>
       <div class="alert alert-danger" role="alert">
         <strong>Oh snap!</strong> <?php echo Session::flash('home-danger');?>
       </div>
@@ -34,10 +34,10 @@ if(Session::exists('home-danger')) {
     <select id="select_feed" name="feed" class="form-control">
       <option value="0">All feeds</option>
       <?php
-      foreach (Activity::getFeeds() as $feed) {
-        echo '<option value="' . $feed->feed_id . '">' . $feed->feed_name . '</option>';
-      }
-      ?>
+foreach (Activity::getFeeds() as $feed) {
+	echo '<option value="' . $feed->feed_id . '">' . $feed->feed_name . '</option>';
+}
+?>
     </select>
   </div>
   <div class="form-group">
@@ -45,31 +45,31 @@ if(Session::exists('home-danger')) {
     <select id="select_Pipeline" name="Pipeline" class="form-control">
       <option value="0">All pipelines</option>
       <?php
-      foreach (Activity::getStreams() as $stream) {
-        echo '<option value="' . $stream->id . '">' . $stream->name . '</option>';
-      }
-      ?>
+foreach (Activity::getStreams() as $stream) {
+	echo '<option value="' . $stream->id . '">' . $stream->name . '</option>';
+}
+?>
     </select>
   </div>
   <input type="hidden" value="" id="select_act" name="act"/>
-  <?php 
+  <?php
 
-   if($user->hasPermission('admin')){
-      ?>
+if ($user->hasPermission('admin')) {
+	?>
         <div class="form-group">
           <label class="sr-only" for="select_Pipeline">Select Pipeline</label>
           <select id="uid" name="uid" class="form-control">
-            <option value="<?php echo $user->data()->id; ?>">Just mine</option>
+            <option value="<?php echo $user->data()->id;?>">Just mine</option>
             <option value="0">All Users</option>
           </select>
         </div>
       <?php
-    } else {
-      ?>
-        <input type="hidden" value="<?php echo $user->data()->id; ?>" id="uid" name="uid"/>
+} else {
+	?>
+        <input type="hidden" value="<?php echo $user->data()->id;?>" id="uid" name="uid"/>
       <?php
-    }
-  ?>
+}
+?>
 </form>
 <h1>Activity Tracker</h1>
 </div>
@@ -84,10 +84,10 @@ if(Session::exists('home-danger')) {
 <?php
 $act = new Activity();
 foreach ($act->getAllActivities() as $key => $value) {
-  echo '<li  title="' . $value->FULL_NAME . ' - '. $value->DESCRIPTION . '" class="act_list_item" role="presentation" id="' . str_pad($value->ID, 2, '0', STR_PAD_LEFT) . '">';
-  echo '<a href="javascript:void(0)"  onclick="setActivity(' . str_pad($value->ID, 2, '0', STR_PAD_LEFT) . ');"><span class="label label-default">' . $value->SHORT_NAME . '</span>';
-  echo ' <span id="b_' . str_pad($value->ID, 2, '0', STR_PAD_LEFT) . '" class="label label-warning" style="display:none;">0</span>';
-  echo ' <span id="m_' . str_pad($value->ID, 2, '0', STR_PAD_LEFT) . '" class="label label-success" style="display:none;">0</span></a></li>';
+	echo '<li  title="' . $value->FULL_NAME . ' - ' . $value->DESCRIPTION . '" class="act_list_item" role="presentation" id="' . str_pad($value->ID, 2, '0', STR_PAD_LEFT) . '">';
+	echo '<a href="javascript:void(0)"  onclick="setActivity(' . str_pad($value->ID, 2, '0', STR_PAD_LEFT) . ');"><span class="label label-default">' . $value->SHORT_NAME . '</span>';
+	echo ' <span id="b_' . str_pad($value->ID, 2, '0', STR_PAD_LEFT) . '" class="label label-warning" style="display:none;">0</span>';
+	echo ' <span id="m_' . str_pad($value->ID, 2, '0', STR_PAD_LEFT) . '" class="label label-success" style="display:none;">0</span></a></li>';
 }
 
 ?>
@@ -157,6 +157,6 @@ foreach ($act->getAllActivities() as $key => $value) {
 
 <?php
 echoActiveIfAttributeMatches('act', $value->SHORT_NAME);
-require_once('php/templates/footer.php');
+require_once 'php/templates/footer.php';
 ?>
 <script src="js/activity.js"></script>
