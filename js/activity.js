@@ -57,13 +57,16 @@ function changeStage(xcpid, stage) {
             });
     }
     else {
+        console.log(xcpid + ': stay in current Acttivity');
         $.ajax('data/activity.change.php?xcpid=' + xcpid + '&status=' + stage)
             .done(function (e) {
                 if (e == 'OK') {
-                    $.ajax('data/activity.data.lookup.php?type=persistantAssignment&key='+currentAct+','+currentStatus+'|' + stage.replace(":",",") + '|' + $('#row_XCP0672132' ).parents('tr').find( '.pipeline' ).text())
+                    $.ajax('data/activity.data.lookup.php?type=persistantAssignment&key='+currentAct+','+currentStatus+'|' + stage.replace(":",",") + '|' + $('#row_' + xcpid ).parents('tr').find( '.pipeline' ).text())
                         .done(function (e) {
                             if( e == 1) {
-                                setAsNow(xcpid)
+                                console.log(xcpid + ': keep assignment');
+                                setAsNow(xcpid, 'mine');
+                                console.log('clear button');
                                 window.tasks_mine.cell($('#row_' + xcpid).parents('tr').find('span.status').parents('td')).data(
                                     '<span class="status" title=""><span class="stage">' + stage + '</span> - <i class="fa fa-spinner fa-pulse"></i></span>'
                                 );
@@ -73,6 +76,7 @@ function changeStage(xcpid, stage) {
                                 $('#row_' + xcpid).parents('tr').find('div.nextContent').show()
                                 $('#BUTTON_' + xcpid + ' > ul > .current > a').html('<i class="fa fa-bullseye"></i> <i class="fa fa-spinner fa-pulse"></i>')
                             } else if(e == 0) {
+                                console.log(xcpid + ': release to team');
                                 var row = window.tasks_mine.row($('#row_' + xcpid).parents('tr'));
                                 rowNode = row.node();
                                 if ($(rowNode).find('td').length == 9) {
@@ -112,6 +116,7 @@ function changeStage(xcpid, stage) {
 
 function setAsNow(xcpid, loc) {
     var d = new Date();
+    console.log(d);
     switch (loc) {
     case 'mine':
         window.tasks_mine.cell($('#row_' + xcpid).parents('tr').find('time').parents('td')).data(
