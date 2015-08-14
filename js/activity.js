@@ -60,7 +60,7 @@ function changeStage(xcpid, stage) {
         $.ajax('data/activity.change.php?xcpid=' + xcpid + '&status=' + stage)
             .done(function (e) {
                 if (e == 'OK') {
-                    $.ajax('data/activity.data.lookup.php?type=persistantAssignment&key='+currentAct+','+currentStatus+'|' + stage.replace(":",",") + '|' + $('#row_XCP0672132' ).parents('tr').find( '.pipeline' ).text())
+                    $.ajax('data/activity.data.lookup.php?type=persistantAssignment&key='+currentAct+','+currentStatus+'|' + stage.replace(":",",") + '|' + $('#row_' + xcpid ).parents('tr').find( '.pipeline' ).text())
                         .done(function (e) {
                             if( e == 1) {
                                 setAsNow(xcpid)
