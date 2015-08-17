@@ -18,17 +18,24 @@ switch ($type) {
 		break;
 
 	case 'persistantAssignment':
-		//echo $key;
 		$stages = split("\|", $key);
 		$actDataFrom = Activity::splitStage($stages[0], ",");
 		$actDataTo   = Activity::splitStage($stages[1], ",");
 		$pipeline = $stages[2];
 
-		print_r(Activity::maintainAssign($actDataFrom['activity'],$actDataFrom['status'],$actDataTo['activity'],$actDataTo['status'],$pipeline));
+		$out = (Activity::maintainAssign($actDataFrom['activity'],$actDataFrom['status'],$actDataTo['activity'],$actDataTo['status'],$pipeline));
+		break;
+
+	case 'getAction':
+		$stages = split("\|", $key);
+		$actDataFrom = Activity::splitStage($stages[0], ",");
+		$actDataTo   = Activity::splitStage($stages[1], ",");
+		$pipeline = $stages[2];
+		$out = (Activity::getAction($actDataFrom['activity'],$actDataFrom['status'],$actDataTo['activity'],$actDataTo['status'],$pipeline));
 		break;
 	
 	default:
-		# code...
+		$out = false;
 		break;
 }
 
