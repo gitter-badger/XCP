@@ -242,6 +242,31 @@ class Activity {
 			return flase;
 	}
 
+	public static function getAction($actFrom,$statFrom,$actTo,$statTo,$stream_id) {
+
+			$db = DB::getInstance();
+			$sql = "SELECT act_out, status_out, action_id FROM ACT_MAPPING_VIEW WHERE act_in = '" . $actFrom . "' AND status_in = '" . $statFrom . "' AND pipeline_id = " . $stream_id;
+			$data = $db->query($sql);
+			if($data->count()) {
+				$return = $data->results();
+				$rulesArray = array();
+				foreach ($return as $value) {
+					if(is_numeric($value->status_out)){
+						if($value->status_out == $statTo && $value->act_out == $actTo) {
+							return $value->action_id;
+						}
+					} elseif(substr($value->status_out,0,1) == "*") {
+						// All available at ACT
+						if($value->act_out == $actTo) {
+							return $value->action_id;
+						}
+					}
+				}
+				return flase;
+			}
+			return flase;
+	}
+
 	public static function maintainAssignment($act,$stat) {
 		$sql = "SELECT assign FROM ACT_MAPPING WHERE act_in = $act AND status_in = $stat";
 
