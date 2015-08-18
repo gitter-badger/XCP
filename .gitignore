@@ -44,3 +44,4 @@ Temporary Items
 web.config
 *.sublime-workspace
 items/
+toSend/
