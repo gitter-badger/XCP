@@ -2,17 +2,18 @@ var resCount = 0;
 
 function getInfo(buttonId) {
     var xcpid = buttonId.replace('BUTTON_', '')
+    $('#updateData').modal({ show: false});
     if (!$('#BUTTON_' + buttonId).hasClass("done")) {
         $.ajax('data/activity.xcp.data.php?xcpid=' + xcpid)
             .done(function (e) {
                 if (e != 'ERROR') {
-                    $('#BUTTON_' + buttonId + ' > ul > div').hide()
-                    $('#BUTTON_' + buttonId + ' > ul > .nextContent').before(e);
-                    $('#BUTTON_' + buttonId).addClass('done');
-                    $('#BUTTON_' + buttonId + ' > ul > .current > a').html('<i class="fa fa-bullseye"></i> ' + $('#row_' + buttonId).parents('tr').find('span.status').text().substring(8))
+                    $( '#BUTTON_' + buttonId + ' > ul > div' ).hide()
+                    $( '#BUTTON_' + buttonId + ' > ul > .nextContent' ).before(e);
+                    $( '#BUTTON_' + buttonId ).addClass( 'done' );
+                    $( '#BUTTON_' + buttonId + ' > ul > .current > a' ).html('<i class="fa fa-bullseye"></i> ' + $( '#row_' + buttonId ).parents( 'tr' ).find( 'span.status' ).text().substring(8))
                 }
                 else {
-                    alert(e);
+                    alert( e );
                 }
             });
     }
@@ -30,83 +31,96 @@ function testOut(no) {
 }
 
 function changeStage(xcpid, stage) {
+
     var currentAct = $('#row_' + xcpid).parents('tr').find('.stage').text().substr(0, 2);
     var currentStatus = $('#row_' + xcpid).parents('tr').find('.stage').text().substr(3,2);
     var targetAct = stage.substring(0, 2);
-    
+    $('#row_' + xcpid).parents('tr').animate({'backgroundColor': '#62C5A7'})
     $.ajax('data/activity.data.lookup.php?type=getAction&key='+currentAct+','+currentStatus+'|' + stage.replace(":",",") + '|' + $('#row_' + xcpid ).parents('tr').find( '.pipeline' ).text())
         .done(function (e) {
             var actionId = e;
+            var update = false;
             console.log( actionId );
             if ( actionId ) {
-                alert( 'Action Required: ' + actionId);
-                return false;
-            }
-
-            $('#row_' + xcpid).parents('tr').animate({'backgroundColor': '#62C5A7'})
-            if (currentAct != targetAct) {
-                $.ajax('data/activity.change.php?xcpid=' + xcpid + '&status=' + stage)
-                .done(function (e) {
-                    if (e == 'OK') {
-                     console.log(window.tasks_mine);
-                        window.tasks_mine.row($('#row_' + xcpid).parents('tr')).remove().draw();
+                //alert( 'Action Required: ' + actionId);
+                var promise = doAction(xcpid, actionId);
+                promise.then(function(result) { 
+                    //alert( "Result: " + result);
+                    if(result == "ERROR") {
+                        $('#row_' + xcpid).parents('tr').animate({'backgroundColor': '#E28686'});
+                        //alert( "ERROR!" );
+                        update = false;
                     } else {
-                        $('string/element/array/function/jQuery object/string, context')('#row_' + xcpid).parents('tr').animate({
-                            'backgroundColor': '#E28686'
-                        });
-                        alert(e);
+                        update = true;
                     }
-                })
-                .fail(function () {
-                    $('#row_' + xcpid).parents('tr').animate({'backgroundColor': '#E28686'});
                 });
             } else {
-                $.ajax('data/activity.change.php?xcpid=' + xcpid + '&status=' + stage)
-                .done(function (e) {
-                    if (e == 'OK') {
-                        $.ajax('data/activity.data.lookup.php?type=persistantAssignment&key='+currentAct+','+currentStatus+'|' + stage.replace(":",",") + '|' + $('#row_' + xcpid ).parents('tr').find( '.pipeline' ).text())
-                            .done(function (e) {
-                                if( e == 1) {
-                                    setAsNow(xcpid)
-                                    window.tasks_mine.cell($('#row_' + xcpid).parents('tr').find('span.status').parents('td')).data(
-                                    '<span class="status" title=""><span class="stage">' + stage + '</span> - <i class="fa fa-spinner fa-pulse"></i></span>'
-                                    );
-                                    setStatusData(xcpid, stage);
-                                    $('#BUTTON_' + xcpid).removeClass('done');
-                                    $('#row_' + xcpid).parents('tr').find('li.actionMenu').remove()
-                                    $('#row_' + xcpid).parents('tr').find('div.nextContent').show()
-                                    $('#BUTTON_' + xcpid + ' > ul > .current > a').html('<i class="fa fa-bullseye"></i> <i class="fa fa-spinner fa-pulse"></i>')
-                                } else if(e == 0) {
-                                    var row = window.tasks_mine.row($('#row_' + xcpid).parents('tr'));
-                                    rowNode = row.node();
-                                    if ($(rowNode).find('td').length == 9) {
-                                      $(rowNode).find('time').parent().before('<td>TODO</td>')
-                                    }
-                                    $(rowNode).find('.dropdown').html('<button id="' + xcpid + '"  class="btn btn-warning btn-sm pull-right" ><i class="fa fa-check-square-o"></i> CLAIM</button>')
-                                    row.remove().draw();
-                                    window.tasks_team.row.add(rowNode).draw();
-                                    $(rowNode).find('#' + xcpid).click(function( e ) {
-                                        e.preventDefault();
-                                        console.log( e.target.id );
-                                        claim( e.target.id );
-                                    }); 
-                                }
-                            })
-                    } else {
-                        $('#row_' + xcpid).parents('tr').css('backgroundColor', '#E28686')
-                        alert("Something went wrong:\n\n" + e);
-                    }
-                })
-                .fail(function (e) {
-                    $('#row_' + xcpid).parents('tr').css('backgroundColor', '#E28686');
-                    alert("Something went wrong:\n\n" + e);
-                });
+                update = true;
             }
-
+            if(update == true) {
+                if (currentAct != targetAct) {
+                    $.ajax('data/activity.change.php?xcpid=' + xcpid + '&status=' + stage)
+                    .done(function (e) {
+                        if (e == 'OK') {
+                         console.log(window.tasks_mine);
+                            window.tasks_mine.row($('#row_' + xcpid).parents('tr')).remove().draw();
+                        } else {
+                            $('#row_' + xcpid).parents('tr').animate({
+                                'backgroundColor': '#E28686'
+                            });
+                            alert(e);
+                        }
+                    })
+                    .fail(function () {
+                        $('#row_' + xcpid).parents('tr').animate({'backgroundColor': '#E28686'});
+                    });
+                } else {
+                    $.ajax('data/activity.change.php?xcpid=' + xcpid + '&status=' + stage)
+                    .done(function (e) {
+                        if (e == 'OK') {
+                            $.ajax('data/activity.data.lookup.php?type=persistantAssignment&key='+currentAct+','+currentStatus+'|' + stage.replace(":",",") + '|' + $('#row_' + xcpid ).parents('tr').find( '.pipeline' ).text())
+                                .done(function (e) {
+                                    if( e == 1) {
+                                        setAsNow(xcpid)
+                                        window.tasks_mine.cell($('#row_' + xcpid).parents('tr').find('span.status').parents('td')).data(
+                                        '<span class="status" title=""><span class="stage">' + stage + '</span> - <i class="fa fa-spinner fa-pulse"></i></span>'
+                                        );
+                                        setStatusData(xcpid, stage);
+                                        $('#BUTTON_' + xcpid).removeClass('done');
+                                        $('#row_' + xcpid).parents('tr').find('li.actionMenu').remove()
+                                        $('#row_' + xcpid).parents('tr').find('div.nextContent').show()
+                                        $('#BUTTON_' + xcpid + ' > ul > .current > a').html('<i class="fa fa-bullseye"></i> <i class="fa fa-spinner fa-pulse"></i>')
+                                    } else if(e == 0) {
+                                        var row = window.tasks_mine.row($('#row_' + xcpid).parents('tr'));
+                                        rowNode = row.node();
+                                        if ($(rowNode).find('td').length == 9) {
+                                          $(rowNode).find('time').parent().before('<td>TODO</td>')
+                                        }
+                                        $(rowNode).find('.dropdown').html('<button id="' + xcpid + '"  class="btn btn-warning btn-sm pull-right" ><i class="fa fa-check-square-o"></i> CLAIM</button>')
+                                        row.remove().draw();
+                                        window.tasks_team.row.add(rowNode).draw();
+                                        $(rowNode).find('#' + xcpid).click(function( e ) {
+                                            e.preventDefault();
+                                            console.log( e.target.id );
+                                            claim( e.target.id );
+                                        }); 
+                                    }
+                                })
+                        } else {
+                            $('#row_' + xcpid).parents('tr').css('backgroundColor', '#E28686')
+                            alert("Something went wrong:\n\n" + e);
+                        }
+                    })
+                    .fail(function (e) {
+                        $('#row_' + xcpid).parents('tr').css('backgroundColor', '#E28686');
+                        alert("Something went wrong:\n\n" + e);
+                    });
+                }
+            }
             setTimeout(function () {
                 $('#row_' + xcpid).parents('tr').animate({'backgroundColor': ''})
             }, 1000);
-    });
+        });
 }
 
 function setAsNow(xcpid, loc) {
@@ -141,6 +155,17 @@ function setStatusData(xcpid, status) {
                     );
                 });
         });
+}
+
+function doAction(xcpid, actionId) {
+        var deferred = $.Deferred();
+        $('#updateData').modal({ show: true});
+        modal = $('#updateData')
+        modal.modal('show');
+        modal.find('.modal-title').text('Update data for ' + xcpid)
+        var i = 'ERROR';
+        deferred.resolve(i);
+        return deferred.promise();
 }
 
 function prepButtons() {
@@ -354,16 +379,5 @@ $(function(){
     $("#select_feed").change(function () {
         refreshTrackerTables();
     });
-
-    $('#updateData').on('show.bs.modal', function (event) {
-          var button = $(event.relatedTarget) // Button that triggered the modal
-          var recipient = button.data('xcpid') // Extract info from data-* attributes
-          // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
-          // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
-          var modal = $(this)
-          modal.find('.modal-title').text('Update data for ' + recipient)
-          modal.find('.modal-body input').val(recipient)
-})
-
 
 });

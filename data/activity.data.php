@@ -54,7 +54,7 @@ $results = $data->results();
 			case 'mine':
 
 				$form = '<div class="dropdown" id="BUTTON_'.$result->XCPID.'">';
-				$form .= '<button onclick="getInfo(\''.$result->XCPID.'\')" class="btn btn-success btn-sm dropdown-toggle pull-right" type="button" id="actionMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+				$form .= '<button onclick="getInfo(\''.$result->XCPID.'\')" data-xcpid="'.$result->XCPID.'" class="btn btn-success btn-sm dropdown-toggle pull-right" type="button" id="actionMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
 						    Select stage
 						    <span class="caret"></span>
 						  </button>
