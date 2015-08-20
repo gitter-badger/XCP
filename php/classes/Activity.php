@@ -513,4 +513,18 @@ class Activity {
 		}
 	}
 
+	public static function showItemData($xcpid) {
+		$sql = "SELECT *
+				FROM [dbo].[ITEM_DATA]
+				WHERE xcpid = '" . $xcpid ."'";
+		$db = DB::getInstance();
+		$data = $db->query($sql);
+
+		$res =  $data->results();
+		foreach ($res as $key => $value) {
+			$out[$value->data_key] = $value->data_value;
+		}
+		return $out;
+	}
+
 }
