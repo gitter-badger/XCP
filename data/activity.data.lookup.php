@@ -33,6 +33,11 @@ switch ($type) {
 		$pipeline = $stages[2];
 		$out = (Activity::getAction($actDataFrom['activity'],$actDataFrom['status'],$actDataTo['activity'],$actDataTo['status'],$pipeline));
 		break;
+
+	case 'getActionType':
+		$action = $key;
+		$out = (Activity::getActionType($action));
+		break;
 	
 	default:
 		$out = false;

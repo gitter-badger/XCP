@@ -267,6 +267,13 @@ class Activity {
 			return flase;
 	}
 
+	public static function getActionType($action) {
+		$db = DB::getInstance();
+		$sql = "SELECT action_type FROM ACTION_LIST WHERE action_id = $action";
+		$data = $db->query($sql);
+		return $data->first()->action_type;
+	}
+
 	public static function maintainAssignment($act,$stat) {
 		$sql = "SELECT assign FROM ACT_MAPPING WHERE act_in = $act AND status_in = $stat";
 
@@ -513,9 +520,9 @@ class Activity {
 		}
 	}
 
-	public static function showItemData($xcpid) {
+	public static function showItemData($xcpid, $source) {
 		$sql = "SELECT *
-				FROM [dbo].[ITEM_DATA]
+				FROM $source
 				WHERE xcpid = '" . $xcpid ."'";
 		$db = DB::getInstance();
 		$data = $db->query($sql);
@@ -525,6 +532,24 @@ class Activity {
 			$out[$value->data_key] = $value->data_value;
 		}
 		return $out;
+	}
+
+	public static function changeItemData($xcpid, $key, $value, $method, $source, $user) {
+		$db = DB::getInstance();
+		switch ($method) {
+			case 'update':
+				$sql = "UPDATE $source SET [data_value] = '$value', edited_on = getdate(), edited_by = $user WHERE xcpid = '$xcpid' and data_key = '$key'";
+				break;
+			case 'insert':
+				$sql = "UPDATE $source SET [data_value] = '$value' WHERE xcpid = '$xcpid' and data_key = '$key'";
+				break;
+			case 'delete':
+				$sql = "DELETE FROM $source WHERE xcpid = '$xcpid' and data_key = '$key'";
+				break;
+			default:
+				# code...
+				break;
+		}
 	}
 
 }
