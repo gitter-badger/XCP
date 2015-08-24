@@ -6,6 +6,10 @@ $test = new Activity($xcpid);
 echo "<pre>XCP_ID: " . $xcpid . "<br>";
 echo "ACT: " . $test->getCurrentActivity() . ":" . $test->getCurrentStatus() . "<br>";
 
+print_r(Activity::validateItemData(TAT, ''));
+
+//print_r(Activity::showFieldData('TAT'));
+
 #print_r($test->getActRules());
 #print_r($test->getInfo());
 
@@ -37,7 +41,7 @@ echo '</pre><br>';
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" id="dataModalcancButton">Close</button>
-        <button type="sumbit" class="btn btn-primary" data-complete-text="finished!" data-error-text="error >_<" id="dataModalsendButton">Update</button>
+        <button type="sumbit" class="btn btn-primary" data-complete-text="Finished!" data-error-text="Error" id="dataModalsendButton">Update</button>
       </div>
     </div>
   </div>

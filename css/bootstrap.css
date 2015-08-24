@@ -2910,6 +2910,12 @@ select[multiple].form-group-lg .form-control {
   margin-bottom: 10px;
   color: #737373;
 }
+.error-block {
+  display: block;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  color: #DC5F5F;
+}
 @media (min-width: 768px) {
   .form-inline .form-group {
     display: inline-block;

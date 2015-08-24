@@ -534,21 +534,63 @@ class Activity {
 		return $out;
 	}
 
-	public static function changeItemData($xcpid, $key, $value, $method, $source, $user) {
+	public static function showItemValue($id, $xcpid, $source) {
+		$sql = "SELECT *
+				FROM $source
+				WHERE xcpid = '$xcpid' AND data_key = '$id'";
+		$db = DB::getInstance();
+		$data = $db->query($sql);
+
+		return $data->first()->data_value;
+	}
+
+	public function validateItemData($field, $data) {
+		$info = Activity::showFieldData($field);
+		if($info->data_required && $data == "" ) {
+			return array("status" => "301", "message" => $field . " is a required field.");
+		}elseif($info->data_validation) {
+			$rule = '/' . $info->data_validation . '/';
+			preg_match($rule, $data, $matches);
+			if(empty($matches)){
+				return array("status" => "305", "message" => $field . " is not valid against the rule: " . $info->data_validation);
+			}
+		}
+		return true;
+	}
+
+	public static function showFieldData($field) {
+		$db = DB::getInstance();
+		$sql = "SELECT * FROM ACTION_FIELDS WHERE field_name  = '$field'";
+		$data = $db->query($sql);
+		if($data->count()){
+			return $data->first();
+		}
+		return false;
+	}
+
+	public static function changeItemData($xcpid, $key, $value, $method, $source, $user, $dataType = null) {
 		$db = DB::getInstance();
 		switch ($method) {
 			case 'update':
 				$sql = "UPDATE $source SET [data_value] = '$value', edited_on = getdate(), edited_by = $user WHERE xcpid = '$xcpid' and data_key = '$key'";
 				break;
 			case 'insert':
-				$sql = "UPDATE $source SET [data_value] = '$value' WHERE xcpid = '$xcpid' and data_key = '$key'";
+				$sql = "INSERT INTO [dbo].[ITEM_DATA] ([xcpid],[data_key],[data_value],[data_type],[created_on],[created_by],[edited_on],[edited_by])
+						VALUES ('$xcpid','$key','$value',$dataType,getdate(),$user,NULL,NULL)";
 				break;
 			case 'delete':
 				$sql = "DELETE FROM $source WHERE xcpid = '$xcpid' and data_key = '$key'";
 				break;
 			default:
-				# code...
+				return array('status' => '350', 'message' => 'Unknown database method: ' . $method);
 				break;
+		}
+
+		$db->query($sql);
+		if($db->error()){
+			return array('status' => '300', 'message' => $db->errorInfo());
+		} else {
+			return array('status' => '100', 'message' => 'Updated ' . $key);			
 		}
 	}
 
