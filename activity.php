@@ -129,27 +129,25 @@ foreach ($act->getAllActivities() as $key => $value) {
 
 <!-- START modals -->
 
-<div class="modal fade" id="updateData" tabindex="-1" role="dialog" aria-labelledby="updateData">
+<div class="modal fade" id="dataModal" tabindex="-1" role="dialog" aria-labelledby="dataModalLabel">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="exampleModalLabel"></h4>
+        <h4 class="modal-title" id="dataModalLabel"></h4>
       </div>
       <div class="modal-body">
-        <form>          <div class="form-group">
-            <label for="recipient-name" class="control-label">Recipient:</label>
-            <input type="text" class="form-control" id="recipient-name">
-          </div>
-          <div class="form-group">
-            <label for="message-text" class="control-label">Message:</label>
-            <textarea class="form-control" id="message-text"></textarea>
-          </div>
+        <div id="dataModalLoader"><i class="fa fa-spinner fa-pulse"></i></div>
+        <div id="dataModalError" class="alert alert-danger alert-dismissible" role="alert">
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <strong><i class="fa fa-exclamation-triangle"></i> </strong><span id="errorText"></span>
+        </div>
+        <form>
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Update</button>
+        <button type="button" class="btn btn-default" id="dataModalcancButton">Close</button>
+        <button type="sumbit" class="btn btn-primary" data-complete-text="Finished!" data-error-text="Error" id="dataModalsendButton">Update</button>
       </div>
     </div>
   </div>
