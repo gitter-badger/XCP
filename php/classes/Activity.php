@@ -245,7 +245,7 @@ class Activity {
 	public static function getAction($actFrom,$statFrom,$actTo,$statTo,$stream_id) {
 
 			$db = DB::getInstance();
-			$sql = "SELECT act_out, status_out, action_id FROM ACT_MAPPING_VIEW WHERE act_in = '" . $actFrom . "' AND status_in = '" . $statFrom . "' AND pipeline_id = " . $stream_id;
+			$sql = "SELECT act_out, status_out, action_id FROM ACT_MAPPING_VIEW WHERE act_in = '" . $actFrom . "' AND status_in = '" . $statFrom . "' AND pipeline_id = " . $stream_id . "order by status_out desc";
 			$data = $db->query($sql);
 			if($data->count()) {
 				$return = $data->results();
