@@ -36,6 +36,7 @@ function changeStage(xcpid, stage) {
     var currentStatus = $('#row_' + xcpid).parents('tr').find('.stage').text().substr(3,2);
     var targetAct = stage.substring(0, 2);
     $('#row_' + xcpid).parents('tr').animate({'backgroundColor': '#62C5A7'})
+    console.log('data/activity.data.lookup.php?type=getAction&key='+currentAct+','+currentStatus+'|' + stage.replace(":",",") + '|' + $('#row_' + xcpid ).parents('tr').find( '.pipeline' ).text());
     $.ajax('data/activity.data.lookup.php?type=getAction&key='+currentAct+','+currentStatus+'|' + stage.replace(":",",") + '|' + $('#row_' + xcpid ).parents('tr').find( '.pipeline' ).text())
         .done(function (e) {
             var actionId = e;
@@ -43,36 +44,53 @@ function changeStage(xcpid, stage) {
             console.log( actionId );
             if ( actionId ) {
                 //alert( 'Action Required: ' + actionId);
-                var promise = doAction(xcpid, actionId);
-                promise.then(function(result) { 
-                    //alert( "Result: " + result);
-                    if(result == "ERROR") {
-                        $('#row_' + xcpid).parents('tr').animate({'backgroundColor': '#E28686'});
-                        //alert( "ERROR!" );
-                        update = false;
-                    } else {
+                showDataModal(xcpid, actionId, function(e){
+                    if( e ) {
+                        console.log('Carry on');
                         update = true;
+                        moveToStage(xcpid, stage, function( e ){
+                            setTimeout(function () {
+                                $('#row_' + xcpid).parents('tr').animate({'backgroundColor': ''})
+                            }, 1000);
+                        })
+                    } else {
+                        setTimeout(function () {
+                            $('#row_' + xcpid).parents('tr').animate({'backgroundColor': ''})
+                        }, 1000);
                     }
-                });
+                })
             } else {
-                update = true;
+                moveToStage(xcpid, stage, function( e ){
+                    setTimeout(function () {
+                        $('#row_' + xcpid).parents('tr').animate({'backgroundColor': ''})
+                    }, 1000);
+                })
             }
-            if(update == true) {
-                if (currentAct != targetAct) {
+        });
+}
+
+function moveToStage(xcpid, stage, callback) {
+    var currentAct = $('#row_' + xcpid).parents('tr').find('.stage').text().substr(0, 2);
+    var currentStatus = $('#row_' + xcpid).parents('tr').find('.stage').text().substr(3,2);
+    var targetAct = stage.substring(0, 2);
+    if (currentAct != targetAct) {
                     $.ajax('data/activity.change.php?xcpid=' + xcpid + '&status=' + stage)
                     .done(function (e) {
                         if (e == 'OK') {
                          console.log(window.tasks_mine);
                             window.tasks_mine.row($('#row_' + xcpid).parents('tr')).remove().draw();
+                            callback();
                         } else {
                             $('#row_' + xcpid).parents('tr').animate({
                                 'backgroundColor': '#E28686'
                             });
                             alert(e);
+                            callback(e);
                         }
                     })
                     .fail(function () {
                         $('#row_' + xcpid).parents('tr').animate({'backgroundColor': '#E28686'});
+                        callback(e);
                     });
                 } else {
                     $.ajax('data/activity.change.php?xcpid=' + xcpid + '&status=' + stage)
@@ -105,22 +123,20 @@ function changeStage(xcpid, stage) {
                                             claim( e.target.id );
                                         }); 
                                     }
+                                    callback();
                                 })
                         } else {
                             $('#row_' + xcpid).parents('tr').css('backgroundColor', '#E28686')
                             alert("Something went wrong:\n\n" + e);
+                            callback( e );
                         }
                     })
                     .fail(function (e) {
                         $('#row_' + xcpid).parents('tr').css('backgroundColor', '#E28686');
                         alert("Something went wrong:\n\n" + e);
+                        callback( e );
                     });
                 }
-            }
-            setTimeout(function () {
-                $('#row_' + xcpid).parents('tr').animate({'backgroundColor': ''})
-            }, 1000);
-        });
 }
 
 function setAsNow(xcpid, loc) {
@@ -155,17 +171,6 @@ function setStatusData(xcpid, status) {
                     );
                 });
         });
-}
-
-function doAction(xcpid, actionId) {
-        var deferred = $.Deferred();
-        $('#updateData').modal({ show: true});
-        modal = $('#updateData')
-        modal.modal('show');
-        modal.find('.modal-title').text('Update data for ' + xcpid)
-        var i = 'ERROR';
-        deferred.resolve(i);
-        return deferred.promise();
 }
 
 function prepButtons() {
@@ -366,7 +371,8 @@ function showDataModal(xcpid, action_id, callback) {
     var cancBut = $('#dataModalcancButton');
     $('#dataModalLoader').show()
     $('#dataModalError').hide()
-    $('form').html('');
+    console.log('#' + modal +' form');
+    $( modal ).find( 'form' ).html('');
     butSend.addClass('disabled');
     modal.modal({
         backdrop: 'static',
@@ -405,7 +411,7 @@ function showDataModal(xcpid, action_id, callback) {
                     //Set form title
                     $('#dataModalLoader').hide()
                     butSend.removeClass('disabled');
-                    $('form').html(data);
+                    $( modal ).find( 'form' ).html(data);
                     // set some updates to remove help/error text
                     $('#dataModal').find('form').children(
                         '.form-group').focusin(function(
