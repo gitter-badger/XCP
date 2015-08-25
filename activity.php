@@ -137,6 +137,7 @@ foreach ($act->getAllActivities() as $key => $value) {
         <h4 class="modal-title" id="dataModalLabel"></h4>
       </div>
       <div class="modal-body">
+       <p><span id="dataModalIntro"></span></p><hr>
         <div id="dataModalLoader"><i class="fa fa-spinner fa-pulse"></i></div>
         <div id="dataModalError" class="alert alert-danger alert-dismissible" role="alert">
           <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
