@@ -57,19 +57,16 @@ function showDataModal( xcpid, action_id, callback ) {
 					$( 'form' ).html( data );
 					// set some updates to remove help/error text
 					$( '#dataModal' ).find( 'form' ).children( '.form-group' ).focusin(function( e ){ 
-						console.log('focus trigger');
-						console.log( e );
-						console.log( e.target );
 						var errEll = '#err_' + $(e.target).attr('id')
-						console.log(errEll);
 						$( errEll ).html('')
+						$( '#' + $(e.target).attr('id') ).closest( '.form-group' ).removeClass('has-error');
+						//$( '#' + $(e.target).attr('id') ).closest( '.form-group' ).removeClass('has-success');
 					});
 					
 				})
 				.fail(function( data ) {
-					console.log("error: " + data);
 					$( '#dataModalLoader' ).hide()
-					$( '#dataModalError' ).find( '#errorText' ).text('Unable to load form: ' + data);
+					$( '#dataModalError' ).find( '#errorText' ).text('Unable to load form: ' + data.status + " (" + data.statusText + ")");
 					$( '#dataModalError' ).fadeIn('slow');
 					butSend.button( 'error' );
 				})
@@ -87,7 +84,6 @@ function showDataModal( xcpid, action_id, callback ) {
 								var src = $(value).find( 'input' ).attr('data-source');
 								break;
 							case 'TEXTAREA':
-								console.log($(value).find( 'textarea' ));
 								var val = $(value).find( 'textarea' ).val();
 								var id = $(value).find( 'textarea' ).attr('id');
 								var src = $(value).find( 'textarea' ).attr('data-source');
@@ -96,7 +92,6 @@ function showDataModal( xcpid, action_id, callback ) {
 						}
 						data.push({"id" : id,"value" : val,"source": src});	
 					});
-					console.log(data);
 					butSend.addClass( 'disabled' );
 					$.ajax({
 						url: 'testupdate.php',
@@ -108,7 +103,6 @@ function showDataModal( xcpid, action_id, callback ) {
 							},
 					})
 					.done(function( updateData ) {
-						//console.log(updateData);
 						if( updateData.dbStatus == "100") {
 							butSend.unbind(); //Remove on click listener
 							cancBut.unbind(); //Remove on click listener
@@ -118,21 +112,25 @@ function showDataModal( xcpid, action_id, callback ) {
 							//validation error	
 							$( '#dataModalError' ).find( '#errorText' ).html('<strong>Uh oh,</strong> there were some errors...<br><span id="retErr"></span>');
 							$.each(updateData.details, function(index, error){
-								console.log(error);
-								$( '#err_' + index ).html( error.message );
+								if(error.status == '301') {
+									$( '#err_' + index ).html( '<i class="fa fa-exclamation"></i> ' + error.message );
+									$( '#' + index ).closest( '.form-group' ).addClass('has-error');									
+								}
+								if(error.status == '100') {
+									$( '#' + index ).closest( '.form-group' ).addClass('has-success');									
+								}								
+
 							})
 							$( '#dataModalError' ).fadeIn('slow');
 							butSend.removeClass( 'disabled' );
 						} else {
 							butSend.button( 'error' );
 							$( '#dataModalError' ).find( '#errorText' ).html('Unknown error: ' + updateData.dbStatus + " (" + updateData.message + ")<br>Please contact your Administrator.");
-							console.log(updateData.message);
 							$( '#dataModalError' ).fadeIn('slow');
 						}
 						
 					})
 					.fail(function( data ) {
-						console.log("error: " + data.dbStatus + " (" + data.statusText + ")" );
 						butSend.button( 'error' );
 						$( '#dataModalError' ).find( '#errorText' ).html('Network error: ' + data.dbStatus + " (" + data.statusText + ")<br>Please contact your Administrator.");
 						$( '#dataModalError' ).fadeIn('slow');
@@ -157,8 +155,11 @@ function showDataModal( xcpid, action_id, callback ) {
 		}
 
 	})
-	.fail(function() {
-		console.log("error");
+	.fail(function( data ) {
+		$( '#dataModalLoader' ).hide()
+		butSend.button( 'error' );
+		$( '#dataModalError' ).find( '#errorText' ).html('Network error: ' + data.status + " (" + data.statusText + ")<br>Please contact your Administrator.");
+		$( '#dataModalError' ).fadeIn('slow');
 	})
 	
 	
