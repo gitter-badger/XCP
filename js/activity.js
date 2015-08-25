@@ -33,20 +33,17 @@ function testOut(no) {
 function changeStage(xcpid, stage) {
 
     var currentAct = $('#row_' + xcpid).parents('tr').find('.stage').text().substr(0, 2);
-    var currentStatus = $('#row_' + xcpid).parents('tr').find('.stage').text().substr(3,2);
+    var currentStatus = $('#row_' + xcpid).parents('tr').find('.stage').text().substr(3, 2);
     var targetAct = stage.substring(0, 2);
     $('#row_' + xcpid).parents('tr').animate({'backgroundColor': '#62C5A7'})
-    console.log('data/activity.data.lookup.php?type=getAction&key='+currentAct+','+currentStatus+'|' + stage.replace(":",",") + '|' + $('#row_' + xcpid ).parents('tr').find( '.pipeline' ).text());
     $.ajax('data/activity.data.lookup.php?type=getAction&key='+currentAct+','+currentStatus+'|' + stage.replace(":",",") + '|' + $('#row_' + xcpid ).parents('tr').find( '.pipeline' ).text())
         .done(function (e) {
             var actionId = e;
             var update = false;
-            console.log( actionId );
             if ( actionId ) {
                 //alert( 'Action Required: ' + actionId);
                 showDataModal(xcpid, actionId, function(e){
                     if( e ) {
-                        console.log('Carry on');
                         update = true;
                         moveToStage(xcpid, stage, function( e ){
                             setTimeout(function () {
@@ -77,7 +74,6 @@ function moveToStage(xcpid, stage, callback) {
                     $.ajax('data/activity.change.php?xcpid=' + xcpid + '&status=' + stage)
                     .done(function (e) {
                         if (e == 'OK') {
-                         console.log(window.tasks_mine);
                             window.tasks_mine.row($('#row_' + xcpid).parents('tr')).remove().draw();
                             callback();
                         } else {
@@ -112,14 +108,13 @@ function moveToStage(xcpid, stage, callback) {
                                         var row = window.tasks_mine.row($('#row_' + xcpid).parents('tr'));
                                         rowNode = row.node();
                                         if ($(rowNode).find('td').length == 9) {
-                                          $(rowNode).find('time').parent().before('<td>TODO</td>')
+                                            $(rowNode).find('time').parent().before('<td>TODO</td>')
                                         }
                                         $(rowNode).find('.dropdown').html('<button id="' + xcpid + '"  class="btn btn-warning btn-sm pull-right" ><i class="fa fa-check-square-o"></i> CLAIM</button>')
                                         row.remove().draw();
                                         window.tasks_team.row.add(rowNode).draw();
                                         $(rowNode).find('#' + xcpid).click(function( e ) {
                                             e.preventDefault();
-                                            console.log( e.target.id );
                                             claim( e.target.id );
                                         }); 
                                     }
@@ -178,7 +173,6 @@ function prepButtons() {
     $( '.claimButton' ).unbind();
     $( '.claimButton' ).click(function( e ) {
         e.preventDefault();
-        console.log( e.target.id );
         claim( e.target.id );
     });        
 
@@ -204,22 +198,24 @@ function claim(xcpid) {
                     '<li class="dropdown-header">Select next stage</li><div style="margin-left: 1.5em;" class="nextContent"><i class="fa fa-spinner fa-pulse"></i></div>' +
                     '<li role="separator" class="divider"></li>' +
                     '<li><a href="javascript:void(0)" onclick="unassign(\'' + xcpid + '\')"><i class="fa fa-undo"></i> Unclaim item</a></li>' +
-                    '</div>')
+                    '</div>');
                 row.remove().draw();
                 window.tasks_mine.row.add(rowNode).draw();
+                setTimeout(function () {
+                    $('#row_' + xcpid).parents('tr').animate({'backgroundColor': ''});
+                }, 1000);
             }
             else {
                 $('#row_' + xcpid).parents('tr').animate({
                     'backgroundColor': '#E28686'
                 })
                 alert(e);
+                setTimeout(function () {
+                    $('#row_' + xcpid).parents('tr').animate({'backgroundColor': ''});
+                }, 1000);
             }
         });
-    setTimeout(function () {
-        $('#row_' + xcpid).parents('tr').animate({
-            'backgroundColor': ''
-        });
-    }, 1000);
+    
 }
 
 function unassign(xcpid) {
@@ -240,7 +236,6 @@ function unassign(xcpid) {
                 window.tasks_team.row.add(rowNode).draw();
                 $(rowNode).find('#' + xcpid).click(function( e ) {
                     e.preventDefault();
-                    console.log( e.target.id );
                     claim( e.target.id );
                 }); 
             }
@@ -371,7 +366,6 @@ function showDataModal(xcpid, action_id, callback) {
     var cancBut = $('#dataModalcancButton');
     $('#dataModalLoader').show()
     $('#dataModalError').hide()
-    console.log('#' + modal +' form');
     $( modal ).find( 'form' ).html('');
     butSend.addClass('disabled');
     modal.modal({
@@ -394,7 +388,6 @@ function showDataModal(xcpid, action_id, callback) {
             key: action_id
         },
     }).done(function(action_type) {
-        console.log("success: " + action_type);
         switch (action_type) {
             case '1':
                 //This is an edit of KEY/VALUE DATA
@@ -402,7 +395,7 @@ function showDataModal(xcpid, action_id, callback) {
                 $.ajax({
                     url: 'testdata.php',
                     type: 'GET',
-                    dataType: 'html',
+                    dataType: 'json',
                     data: {
                         xcpid: xcpid,
                         action_id: action_id
@@ -411,26 +404,18 @@ function showDataModal(xcpid, action_id, callback) {
                     //Set form title
                     $('#dataModalLoader').hide()
                     butSend.removeClass('disabled');
-                    $( modal ).find( 'form' ).html(data);
+                    $( modal ).find( '.modal-title' ).html(data.title.replace('%XCPID%',xcpid));
+                    $( '#dataModalIntro' ).text( data.intro )
+                    $( modal ).find( 'form' ).html(data.form);
                     // set some updates to remove help/error text
-                    $('#dataModal').find('form').children(
-                        '.form-group').focusin(function(
-                        e) {
-                        var errEll = '#err_' + $(e.target)
-                            .attr('id')
+                    $('#dataModal').find('form').children('.form-group').focusin(function(e) {
+                        var errEll = '#err_' + $(e.target).attr('id')
                         $(errEll).html('')
-                        $('#' + $(e.target).attr(
-                            'id')).closest(
-                            '.form-group').removeClass(
-                            'has-error');
-                        //$( '#' + $(e.target).attr('id') ).closest( '.form-group' ).removeClass('has-success');
+                        $('#' + $(e.target).attr('id')).closest('.form-group').removeClass('has-error');
                     });
                 }).fail(function(data) {
                     $('#dataModalLoader').hide()
-                    $('#dataModalError').find('#errorText')
-                        .text('Unable to load form: ' +
-                            data.status + " (" + data.statusText +
-                            ")");
+                    $('#dataModalError').find('#errorText').text('Unable to load form: ' +data.status + " (" + data.statusText +")");
                     $('#dataModalError').fadeIn('slow');
                     butSend.button('error');
                 })
@@ -446,28 +431,14 @@ function showDataModal(xcpid, action_id, callback) {
                             'nodeName');
                         switch (nodeType) {
                             case 'INPUT':
-                                var val = $(value).find(
-                                    'input').val();
-                                var id = $(value).find(
-                                    'input').attr(
-                                    'id');
-                                var src = $(value).find(
-                                    'input').attr(
-                                    'data-source'
-                                );
+                                var val = $(value).find('input').val();
+                                var id = $(value).find('input').attr('id');
+                                var src = $(value).find('input').attr('data-source');
                                 break;
                             case 'TEXTAREA':
-                                var val = $(value).find(
-                                        'textarea')
-                                    .val();
-                                var id = $(value).find(
-                                        'textarea')
-                                    .attr('id');
-                                var src = $(value).find(
-                                        'textarea')
-                                    .attr(
-                                        'data-source'
-                                    );
+                                var val = $(value).find('textarea').val();
+                                var id = $(value).find('textarea').attr('id');
+                                var src = $(value).find('textarea').attr('data-source');
                                 break;
                             default:
                         }
@@ -483,8 +454,7 @@ function showDataModal(xcpid, action_id, callback) {
                         type: 'POST',
                         dataType: 'json',
                         data: {
-                            data: JSON.stringify(
-                                data),
+                            data: JSON.stringify(data),
                             xcpid: xcpid,
                             action_id: action_id
                         },
@@ -505,63 +475,26 @@ function showDataModal(xcpid, action_id, callback) {
                             $.each(updateData.details,
                                 function(index,
                                     error) {
-                                    if (error.status ==
-                                        '301') {
-                                        $(
-                                            '#err_' +
-                                            index
-                                        ).html(
-                                            '<i class="fa fa-exclamation"></i> ' +
-                                            error
-                                            .message
-                                        );
-                                        $('#' +
-                                            index
-                                        ).closest(
-                                            '.form-group'
-                                        ).addClass(
-                                            'has-error'
-                                        );
+                                    if (error.status =='301') {
+                                        $('#err_' +index).html('<i class="fa fa-exclamation"></i> ' + error.message);
+                                        $('#' + index ).closest( '.form-group' ).addClass( 'has-error' );
                                     }
                                     if (error.status ==
                                         '100') {
-                                        $('#' +
-                                            index
-                                        ).closest(
-                                            '.form-group'
-                                        ).addClass(
-                                            'has-success'
-                                        );
+                                        $('#' + index ).closest( '.form-group' ).addClass( 'has-success' );
                                     }
                                 })
-                            $('#dataModalError').fadeIn(
-                                'slow');
-                            butSend.removeClass(
-                                'disabled');
+                            $('#dataModalError').fadeIn('slow');
+                            butSend.removeClass('disabled');
                         } else {
                             butSend.button('error');
-                            $('#dataModalError').find(
-                                '#errorText').html(
-                                'Unknown error: ' +
-                                updateData.dbStatus +
-                                " (" +
-                                updateData.message +
-                                ")<br>Please contact your Administrator."
-                            );
-                            $('#dataModalError').fadeIn(
-                                'slow');
+                            $('#dataModalError').find('#errorText').html('Unknown error: ' + updateData.dbStatus + " (" + updateData.message + ")<br>Please contact your Administrator." );
+                            $('#dataModalError').fadeIn('slow');
                         }
                     }).fail(function(data) {
                         butSend.button('error');
-                        $('#dataModalError').find(
-                            '#errorText').html(
-                            'Network error: ' +
-                            data.dbStatus +
-                            " (" + data.statusText +
-                            ")<br>Please contact your Administrator."
-                        );
-                        $('#dataModalError').fadeIn(
-                            'slow');
+                        $('#dataModalError').find('#errorText').html( 'Network error: ' + data.dbStatus +" (" + data.statusText + ")<br>Please contact your Administrator." );
+                        $('#dataModalError').fadeIn('slow');
                     })
                 });
                 break;

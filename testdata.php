@@ -4,7 +4,7 @@ require("php/init.php");
 
 $xcpid = Input::get('xcpid');
 $action_id = Input::get('action_id');
-
+$out = array();
 
 $dataTypes = array( 1 =>  'text',
 					2 =>  'password',
@@ -22,11 +22,12 @@ $db->query('SELECT * FROM [dbo].[ACTION_FIELDS] WHERE action_id = ' . $action_id
 $actionFields = $db->results();
 
 foreach ($actionFields as $fieldInfo => $value) {
+	$text .= "";
 	$itemInfo = (Activity::showItemData($xcpid, $value->source_table));
-	echo '<div class="form-group">';
-	echo '<label for="'.$value->field_name.'" class="control-label">';
-	echo $value->field_name_display;
-	echo '</label> ';
+	$text .= '<div class="form-group">';
+	$text .= '<label for="'.$value->field_name.'" class="control-label">';
+	$text .= $value->field_name_display;
+	$text .= '</label> ';
 	switch ($value->data_type) {
 		case 1:
 		case 2:
@@ -34,36 +35,36 @@ foreach ($actionFields as $fieldInfo => $value) {
 		case 4:
 		case 5:
 			if($value->field_prefix || $value->field_suffix) {
-				echo '<div class="input-group">';
+				$text .= '<div class="input-group">';
 			}
 			if($value->field_prefix) {
-				echo '<span class="input-group-addon">' 	. $value->field_prefix . '</span>';
+				$text .= '<span class="input-group-addon">' 	. $value->field_prefix . '</span>';
 			}
-			echo '<input class="form-control" data-source="'. $value->source_table  .'" type="'.$dataTypes[$value->data_type].'" name="'.$value->field_name.'" id="'.$value->field_name.'" ';
+			$text .= '<input class="form-control" data-source="'. $value->source_table  .'" type="'.$dataTypes[$value->data_type].'" name="'.$value->field_name.'" id="'.$value->field_name.'" ';
 			if($value->source_prefill == true && $itemInfo[$value->field_name] != "") {
-				echo 'value="'.$itemInfo[$value->field_name].'"';
+				$text .= 'value="'.$itemInfo[$value->field_name].'"';
 			}elseif($value->data_placeholder) {
-				echo ' placeholder="'.$value->data_placeholder.'"';
+				$text .= ' placeholder="'.$value->data_placeholder.'"';
 			}
 			if($value->data_required) {
-				echo 'required ';
+				$text .= 'required ';
 			}
-			echo '>';
+			$text .= '>';
 			if($value->field_suffix) {
-				echo '<span class="input-group-addon">'.$value->field_suffix.'</span>';
+				$text .= '<span class="input-group-addon">'.$value->field_suffix.'</span>';
 			}
 			break;
 		case 20:
-			echo '<textarea data-source="'. $value->source_table  .'" class="form-control" id="'.$value->field_name.'"';
+			$text .= '<textarea data-source="'. $value->source_table  .'" class="form-control" id="'.$value->field_name.'"';
 			if($value->data_required) {
-				echo ' required ';
+				$text .= ' required ';
 			}
 			if($value->source_prefill == true && $itemInfo[$value->field_name] != "") {
-				echo '>'.$itemInfo[$value->field_name].'</textarea>';
+				$text .= '>'.$itemInfo[$value->field_name].'</textarea>';
 			}elseif($value->data_placeholder) {
-				echo ' placeholder="'.$value->data_placeholder.'"></textarea>';
+				$text .= ' placeholder="'.$value->data_placeholder.'"></textarea>';
 			}else{
-				echo ' ></textarea>';
+				$text .= ' ></textarea>';
 			}
 
 			break;
@@ -73,9 +74,17 @@ foreach ($actionFields as $fieldInfo => $value) {
 			break;
 	}
 	if($value->field_prefix) {
-				echo '</div>';
+				$text .= '</div>';
 		}
-	echo '<span id="err_'.$value->field_name.'" class="error-block"></span></div>';
+	$text .= '<span id="err_'.$value->field_name.'" class="error-block"></span></div>';
 }
+
+
+$out = $arrayName = array('form' => $text,
+						'title' => $actionInfo->action_name,
+						'intro' => $actionInfo->action_description
+					 );
+
+ print(json_encode($out));
 
 ?>
