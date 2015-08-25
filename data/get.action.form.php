@@ -1,6 +1,6 @@
 <?php 
 
-require("php/init.php");
+require("../php/init.php");
 
 $xcpid = Input::get('xcpid');
 $action_id = Input::get('action_id');

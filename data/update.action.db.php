@@ -1,5 +1,5 @@
 <?php 
-require("php/init.php");
+require("../php/init.php");
 $user = new User();
 $xcpid = Input::get('xcpid');
 $datas = Input::get('data');

@@ -393,7 +393,7 @@ function showDataModal(xcpid, action_id, callback) {
                 //This is an edit of KEY/VALUE DATA
                 //Get info for the form
                 $.ajax({
-                    url: 'testdata.php',
+                    url: 'data/get.action.form.php',
                     type: 'GET',
                     dataType: 'json',
                     data: {
@@ -425,10 +425,8 @@ function showDataModal(xcpid, action_id, callback) {
                     $('#dataModal').find('form').children(
                         '.form-group').each(function(
                         index, value) {
-                        var ell = $(value).find(
-                            'input,textarea');
-                        var nodeType = $(ell).prop(
-                            'nodeName');
+                        var ell = $(value).find('input,textarea');
+                        var nodeType = $(ell).prop('nodeName');
                         switch (nodeType) {
                             case 'INPUT':
                                 var val = $(value).find('input').val();
@@ -450,7 +448,7 @@ function showDataModal(xcpid, action_id, callback) {
                     });
                     butSend.addClass('disabled');
                     $.ajax({
-                        url: 'testupdate.php',
+                        url: 'data/update.action.db.php',
                         type: 'POST',
                         dataType: 'json',
                         data: {
