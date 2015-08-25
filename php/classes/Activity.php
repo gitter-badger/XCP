@@ -547,12 +547,12 @@ class Activity {
 	public function validateItemData($field, $data) {
 		$info = Activity::showFieldData($field);
 		if($info->data_required && $data == "" ) {
-			return array("status" => "301", "message" => $field . " is a required field.");
+			return array("status" => "301", "message" => "This is a required field.");
 		}elseif($info->data_validation) {
 			$rule = '/' . $info->data_validation . '/';
 			preg_match($rule, $data, $matches);
 			if(empty($matches)){
-				return array("status" => "305", "message" => $field . " is not valid against the rule: " . $info->data_validation);
+				return array("status" => "301", "message" => $info->data_validation_helper );
 			}
 		}
 		return true;
