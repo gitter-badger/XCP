@@ -2914,7 +2914,7 @@ select[multiple].form-group-lg .form-control {
   display: block;
   margin-top: 5px;
   margin-bottom: 10px;
-  color: #DC5F5F;
+  color: #A94442;
 }
 @media (min-width: 768px) {
   .form-inline .form-group {
