@@ -548,6 +548,8 @@ class Activity {
 		$info = Activity::showFieldData($field);
 		if($info->data_required && $data == "" ) {
 			return array("status" => "301", "message" => "This is a required field.");
+		}elseif(!$info->data_required && $data == ""){
+			return true;
 		}elseif($info->data_validation) {
 			$rule = '/' . $info->data_validation . '/';
 			preg_match($rule, $data, $matches);
