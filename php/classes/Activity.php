@@ -382,10 +382,11 @@ class Activity {
 		return $data->results();
 	}
 
-	public static function updateMappingRule($ruleId, $stage, $assign) {
+	public static function updateMappingRule($ruleId, $stage, $assign, $action) {
 		$stageSplit = Activity::splitStage($stage, ':');
 		$fields = array("act_out" => $stageSplit[activity],
 						"status_out" => $stageSplit[status],
+						"action_id" => $action,
 						"assign" => ($assign ? '1' : '0')
 						);
 		$db = DB::getInstance();
@@ -394,7 +395,7 @@ class Activity {
 		}
 	}
 
-	public static function addMappingRule($fromStage, $toStage, $assign, $set) {
+	public static function addMappingRule($fromStage, $toStage, $assign, $set, $action) {
 		echo $fromStage .':' . $toStage .':' . $assign .':' . $set;
 		$stageSplitTo = Activity::splitStage($toStage, ':');
 		print_r($stageSplitTo);
@@ -403,6 +404,7 @@ class Activity {
 						"status_out" => $stageSplitTo[status],
 						"act_in" => $stageSplitFrom[activity],
 						"status_in" => $stageSplitFrom[status],
+						"action_id" => $action,
 						"assign" => ($assign == 'true' ? '1' : '0'),
 						"set_id" => $set
 						);
@@ -474,7 +476,7 @@ class Activity {
 		$data = $db->query($sql);
 		$activities =  $data->results();
 
-		$sql = "SELECT [act_in],[status_in],[act_out],[status_out],[id],[assign],[set_id]
+		$sql = "SELECT [act_in],[status_in],[act_out],[status_out],[id],[assign],[set_id],[action_id]
   				FROM [dbo].[ACT_MAPPING]";
 
 		$db = DB::getInstance();
@@ -492,6 +494,9 @@ class Activity {
 					foreach ($mappings as $mapping) {
 						if($mapping->act_in == $status->act && $mapping->status_in == $status->status) {
 							$rules[$mapping->set_id][] = array(
+												'action' => $mapping->action_id,
+												'activity' => $mapping->act_out,
+												'status' => $mapping->status_out,
 												'stage' => $mapping->act_out . ':' . $mapping->status_out,
 												'assign' => $mapping->assign,
 												'id' => $mapping->id);
@@ -558,6 +563,43 @@ class Activity {
 			}
 		}
 		return true;
+	}
+
+	public static function listActivities() {
+		
+		$db = DB::getInstance();
+		$sql = "SELECT * FROM [ACT_DETAIL]";
+		$data = $db->query($sql);
+		$data = $data->results();
+		foreach ($data as $key => $activity) {
+			$out[] = str_pad($activity->ID, 2, '0', STR_PAD_LEFT);
+		}
+		return $out;
+	}
+
+	public static function listStatuses($activity) {
+		$db = DB::getInstance();
+		$sql = "SELECT * FROM [ACT_STATUS_2] WHERE act = '$activity'";
+		$data = $db->query($sql);
+		$data = $data->results();
+		$out[] = '*';
+		foreach ($data as $key => $activity) {
+			$out[] = str_pad($activity->status, 2, '0', STR_PAD_LEFT);
+		}
+		return $out;
+	}
+
+	public static function listActions() {
+		
+		$db = DB::getInstance();
+		$sql = "SELECT * FROM [ACTION_LIST]";
+		$data = $db->query($sql);
+		$data = $data->results();
+		foreach ($data as $key => $activity) {
+			$out[] = array('id' => $activity->action_id, 'name' => $activity->action_name);
+			#$out[] = $activity->action_id;
+		}
+		return $out;
 	}
 
 	public static function showFieldData($field) {

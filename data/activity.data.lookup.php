@@ -1,6 +1,5 @@
 <?php 
-
-require("../php/init.php");
+require( __DIR__ . "/../php/init.php");
 
 $db = DB::getInstance();
 $type = Input::get('type');
@@ -36,14 +35,29 @@ switch ($type) {
 
 	case 'getActionType':
 		$action = $key;
-		$out = (Activity::getActionType($action));
+		$out = Activity::getActionType($action);
 		break;
-	
+
+	case 'getActivities':
+			$out = Activity::listActivities();
+		break;
+
+	case 'getStatuses':
+			$out = Activity::listStatuses($key);
+		break;
+
+	case 'getActions':
+			$out = Activity::listActions();
+		break;
+
 	default:
 		$out = false;
 		break;
 }
-
 if($out) {
-	echo $out;
+	if(is_array($out)){
+		print(json_encode($out));
+	} else {
+		echo $out;
+	}
 }
