@@ -15,20 +15,31 @@ if($id = Input::get('id')){
 	// Show info fopr selected action
 	$actionInfo = Activity::listActions($id);
 	$fieldInfo = Activity::listActionFields($id);
+	$dataTypes = array( 1 =>  'text',
+					2 =>  'password',
+					3 =>  'date',
+					4 =>  'number',
+					5 =>  'email',
+					20 => 'textarea'
+					);
+	if($actionInfo['type'] == 1 || $actionInfo['type'] == '')
+	{
 	?>
 
 	<form action="" method="post" class="form-horizontal">
 	  <div class="form-group" id="name_form">
 	    <label for="name" class="col-sm-3 control-label">Name</label>
 	    <div class="col-sm-6">
-	     	<input value="<?php echo $actionInfo['name'] ;?>" type="text" class="form-control" name="terst" id="name">
+	    	<input value="<?php echo $actionInfo['name'] ;?>" type="text" class="form-control" id="action_name">
+	     	<input value="1" type="hidden" class="form-control" id="action_type">
+	     	<input value="<?php echo $id ;?>" type="hidden" class="form-control" id="action_id">
 	     	<span id="helpBlock" class="help-block">Internal name of this action</span>
 	    </div>
 	  </div>
 	  <div class="form-group" id="title_form">
 	    <label for="name" class="col-sm-3 control-label">Title</label>
 	    <div class="col-sm-6">
-	     	<input value="<?php echo $actionInfo['title'] ;?>" type="text" class="form-control" name="terst" id="title">
+	     	<input value="<?php echo $actionInfo['title'] ;?>" type="text" class="form-control" id="action_title">
 	     	<span id="helpBlock" class="help-block">You may use the following in the title: %XCPID% %UPI%</span>
 	    </div>
 	  </div>
@@ -36,7 +47,7 @@ if($id = Input::get('id')){
 	    <label for="description" class="col-sm-3 control-label">Description</label>
 	    
 	    <div class="col-sm-6">
-	     	<textarea type="text" class="form-control" id="description"><?php echo $actionInfo['description'] ;?></textarea>
+	     	<textarea type="text" class="form-control" id="action_description"><?php echo $actionInfo['description'] ;?></textarea>
 	     	<span id="helpBlock" class="help-block">This will be displayed on the form.</span>
 	    </div>
 	  </div>
@@ -55,7 +66,9 @@ if($id = Input::get('id')){
 							  <p class="col-sm-offset-1 col-sm-1" style="padding-top: 7px;"><span class="label label-default"><?php echo $field['field_id'] ;?></span></p>
 							  <label class="control-label col-sm-1 " for="field_name_<?php echo $field['field_id'] ;?>">Unique name</label>
 							  <div class="col-sm-5">
-								  <input class="form-control" type="form-control activity" id="field_name_<?php echo $field['field_id'] ;?>" value="<?php echo $field['field_name'] ;?>">
+								  <input class="form-control" type="form-control" id="field_name_<?php echo $field['field_id'] ;?>" value="<?php echo $field['field_name'] ;?>">
+								  <input class="form-control" type="hidden" id="action_id_<?php echo $field['field_id'] ;?>" value="<?php echo $field['action_id'] ;?>">
+								  <input class="form-control" type="hidden" id="field_id_<?php echo $field['field_id'] ;?>" value="<?php echo $field['field_id'] ;?>">
 							  </div>			  
 							  <div class="col-sm-1">
 							  <p id="ok_<?php echo $field['field_id'] ;?>" style="color: #3C763D; text-align: center; padding-top: 7px; display: none;"><i class="fa fa-check"></i> Updated</p>
@@ -64,7 +77,7 @@ if($id = Input::get('id')){
 							  		<div class="col-sm-offset-3 col-sm-10">
 									<div class="checkbox">
 										<label>
-										<input id="assign_<?php echo $field['field_id'] ;?>" type="checkbox" <?php if($field['data_required'] == 1){ echo " checked";} ;?>> Required field?
+										<input id="data_required_<?php echo $field['field_id'] ;?>" type="checkbox" <?php if($field['data_required'] == 1){ echo " checked";} ;?>> Required field?
 										</label>
 									</div>
 								</div>
@@ -108,8 +121,17 @@ if($id = Input::get('id')){
 									<input class="form-control" type="form-control activity" id="source_table_<?php echo $field['field_id'] ;?>" value="<?php echo $field['source_table'] ;?>" placeholder="source_table">
 								</div>
 								<div class="col-sm-2">
-									<select type="text" class="form-control status" id="data_type_<?php echo $field['field_id'] ;?>" aria-describedby="inputSuccess2Status">
+									<select type="text" class="form-control status" id="data_type_<?php echo $field['field_id'] ;?>">
 										<option class="status" value="" disabled >Data type</option>
+										<?php
+										foreach ($dataTypes as $key => $type) {
+											if($key == $field['data_type']) {
+												echo '<option class="status" value="' . $key . '" selected>' . $type .  '</option>';	
+											}else{
+												echo '<option class="status" value="' . $key . '">' . $type .  '</option>';	
+											}
+										}
+										?>
 									</select>							  
 								</div>
 								<div class="col-sm-1">
@@ -120,7 +142,7 @@ if($id = Input::get('id')){
 								<div class="col-sm-1">
 									<div class="checkbox">
 										<label>
-											<input id="prefill_<?php echo $field['field_id'] ;?>" type="checkbox" value="" <?php if($field['source_prefill'] == 1){ echo " checked";} ;?>> Prefill?
+											<input id="source_prefill_<?php echo $field['field_id'] ;?>" type="checkbox" value="" <?php if($field['source_prefill'] == 1){ echo " checked";} ;?>> Prefill?
 										</label>
 									</div>
 								</div>
@@ -143,6 +165,9 @@ if($id = Input::get('id')){
 	</form>
 
 	<?php
+	} else {
+		echo 'Uh Oh, thats not the right action type';
+	}
 } else {
 	// Show list of ACT and STAT
 	$actionInfo = Activity::listActions();
@@ -164,77 +189,84 @@ if($id = Input::get('id')){
 ?>
 <!-- clonable form -->
 
-<div class="editRule" style="display: none;">
+<div class="addRule" style="display: none;">
 	<div class="form-group" id="xx">
 	  <p class="col-sm-offset-1 col-sm-1" style="padding-top: 7px;"><span class="label label-default">xx</span></p>
-	  <label class="control-label col-sm-1 " for="activity_x">Unique name</label>
+	  <label class="control-label col-sm-1 " for="field_name_xx">Unique name</label>
 	  <div class="col-sm-5">
-		  <input class="form-control" type="form-control activity" id="activity_x" value="">
+		  <input class="form-control" type="form-control activity" id="field_name_xx" value="">
+		  <input class="form-control" type="hidden" id="action_id_xx" value="<?php echo $id; ?>">
+		  <input class="form-control" type="hidden" id="field_id_xx" value="">
 	  </div>			  
 	  <div class="col-sm-1">
-	  <p id="ok_x" style="color: #3C763D; text-align: center; padding-top: 7px; display: none;"><i class="fa fa-check"></i> Updated</p>
-	  <p id="err_x"style="color: #A94442; text-align: center; padding-top: 7px; display: none;"><i class="fa fa-times"></i> Error</p>
+	  <p id="ok_xx" style="color: #3C763D; text-align: center; padding-top: 7px; display: none;"><i class="fa fa-check"></i> Updated</p>
+	  <p id="err_xx"style="color: #A94442; text-align: center; padding-top: 7px; display: none;"><i class="fa fa-times"></i> Error</p>
 	  </div>
 	  		<div class="col-sm-offset-3 col-sm-10">
 			<div class="checkbox">
 				<label>
-				<input id="assign_x" type="checkbox"> Required field?
+				<input id="data_required_xx" type="checkbox" > Required field?
 				</label>
 			</div>
 		</div>
 	</div>
 	<div class="form-group" >
-	  <label class="control-label col-sm-3 " for="display_xx">Display</label>
+	  <label class="control-label col-sm-3 " for="field_name_display_xx">Display</label>
 	  <div class="col-sm-6">
-		  <input class="form-control" type="form-control activity" id="display_xx" value="">
+		  <input class="form-control" type="form-control activity" id="field_name_display_xx" value="">
 	  </div>
 	</div>
 	<div class="form-group" >
-	  <label class="control-label col-sm-3 " for="prefix_xx">Prefix / Suffix</label>
+	  <label class="control-label col-sm-3 " for="field_prefix_xx">Prefix / Suffix</label>
 	  <div class="col-sm-3">
-	  <input class="form-control" type="form-control activity" id="prefix_x" value="" placeholder="prefix">
+	  <input class="form-control" type="form-control activity" id="field_prefix_xx" value="" placeholder="prefix">
 	  </div>			  
 	  <div class="col-sm-3">
-	  <input class="form-control" type="form-control activity" id="suffix_x" value="" placeholder="suffix">
+	  <input class="form-control" type="form-control activity" id="field_suffix_xx" value="" placeholder="suffix">
 	  </div>
 	</div>
 	<div class="form-group" >
-	  <label class="control-label col-sm-3 " for="placeholder_xx">Placeholder</label>
+	  <label class="control-label col-sm-3 " for="data_placeholder_xx">Placeholder</label>
 	  <div class="col-sm-6">
-		  <input class="form-control" type="form-control activity" id="placeholder_xx" value="" placeholder="placeholder">
+		  <input class="form-control" type="form-control activity" id="data_placeholder_xx" value="" placeholder="placeholder">
 	  </div>
 	</div>
 	<div class="form-group" >
-	  <label class="control-label col-sm-3 " for="valrule_xx">Validation rule</label>
+	  <label class="control-label col-sm-3 " for="data_validation_xx">Validation rule</label>
 	  <div class="col-sm-6">
-		  <input class="form-control" type="form-control activity" id="valrule_xx" value="" placeholder="validation rule">
+		  <input class="form-control" type="form-control activity" id="data_validation_xx" value="" placeholder="validation rule">
 	  </div>
 	</div>
 	<div class="form-group" >
-	  <label class="control-label col-sm-3" for="valhelp_xx">data_validation_helper</label>
+	  <label class="control-label col-sm-3" for="data_validation_helper_xx">data_validation_helper</label>
 	  <div class="col-sm-6">
-		  <input class="form-control" type="form-control activity" id="valhelp_xx" value="" placeholder="data_validation_helper">
+		  <input class="form-control" type="form-control activity" id="data_validation_helper_xx" value="" placeholder="data_validation_helper">
 	  </div>
 	</div>
 	<div class="form-group" >
-		<label class="control-label col-sm-3 " for="dataitem_xx">Database</label>
+		<label class="control-label col-sm-3 " for="source_table_xx">Database</label>
 		<div class="col-sm-2">
-			<input class="form-control" type="form-control activity" id="dataitem_xx" value="" placeholder="source_table">
+			<input class="form-control" type="form-control activity" id="source_table_xx" value="" placeholder="source_table">
 		</div>
 		<div class="col-sm-2">
-			<select type="text" class="form-control status" id="datatype_xx" >
+			<select type="text" class="form-control status" id="data_type_xx" >
 				<option class="status" value="" disabled >Data type</option>
+				<?php
+				foreach ($dataTypes as $key => $type) {
+					echo '<option class="status" value="' . $key . '">' . $type .  '</option>';
+				}
+				?>
 			</select>							  
 		</div>
 		<div class="col-sm-1">
-			<select type="text" class="form-control status" id="datachild_xx" >
+			<select type="text" class="form-control status" id="data_child_of_xx">
 				<option class="status" value="" disabled >Child of...</option>
 			</select>								  
 		</div>
 		<div class="col-sm-1">
 			<div class="checkbox">
 				<label>
-					<input id="prefill_xx" type="checkbox" value=""> Prefill?
+					<input id="source_prefill_xx" type="checkbox" value=""> Prefill?
 				</label>
 			</div>
 		</div>
@@ -242,8 +274,8 @@ if($id = Input::get('id')){
 	<div class="form-group">
 	  <label class="control-label col-sm-3 " for="inputSuccess2"></label>
 	  <div class="col-sm-4">
-	  	<button type="button" onclick="removeRule('editRule_<?php echo $field['field_id'] ;?>')" class="btn btn-danger"><i class="fa fa-trash-o"></i> Delete</button>
-		<button type="button" onclick="addRuleInput(<?php echo "'" . $ruleset . "'"; ?>)" class="btn btn-warning"><i class="fa fw fa-plus"></i> Add rule</button>
+	  	<button type="button" onclick="removeRule('addRule_xx')" class="btn btn-danger"><i class="fa fa-trash-o"></i> Delete</button>
+		<button type="button" onclick="addRuleInput()" class="btn btn-warning"><i class="fa fw fa-plus"></i> Add rule</button>
 		<button type="button" onclick="update()" class="btn btn-primary"><i class="fa fa-pencil"></i> Update</button>
 		</div>
 	</div>

@@ -668,4 +668,45 @@ class Activity {
 		}
 	}
 
+	public static function deleteActionField($id) {
+		$db = DB::getInstance();
+		$db->delete( "ACTION_FIELDS", array('field_id','=',$id) );
+	}
+
+	public static function addActionRule($data) {
+		$db = DB::getInstance();
+		if(!$db->insert('ACTION_FIELDS', $data)) {
+			throw new Exception($db->errorInfo()[2]);
+		}
+	}
+
+	public static function updateActionRule($id, $data) {
+		$stageSplit = Activity::splitStage($stage, ':');
+		$db = DB::getInstance();
+		if(!$db->update('ACTION_FIELDS', $id, 'field_id', $data)) {
+			throw new Exception($db->errorInfo()[2]);
+		}
+	}
+	public static function updateActionInfo($id, $action_type, $action_title, $action_name, $action_description) {
+		$db = DB::getInstance();
+		$db->query("SELECT * FROM ACTION_LIST WHERE action_id = $id");
+		if($db->count()){
+			//UPDATE
+			$sql = "UPDATE ACTION_LIST SET 
+						action_type = '$action_type'
+						,action_name = '$action_name'
+						,action_description = '$action_description'
+						,action_title = '$action_title'
+						WHERE action_id = $id";
+		} else {
+			//INSERT
+			$sql = "INSERT INTO [dbo].[ACTION_LIST] ([action_id],[action_type],[action_name],[action_description],[action_title])
+     					VALUES($id, $action_type,'$action_name','$action_description','$action_title')";
+		}
+		echo $sql;
+		if(!$db->query($sql)) {
+			throw new Exception($db->errorInfo()[2]);
+		}
+	}
+
 }

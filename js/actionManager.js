@@ -2,68 +2,62 @@ count = 1
 function addRuleInput(ruleset) {
 	$( '#xx' ).parent().clone().appendTo($( '.rules' )).html(function(index,html){return html.replace(/xx/g,"a" + count).replace(/yy/g, ruleset);}).fadeIn()
 	setUpdates();
-	count = count + 1;
+	$( '#a' + count ).parent().animate({'backgroundColor': '#62C5A7'}).animate({'backgroundColor': ''})
+
+	count = count + 1;	
 }
 
-function updateStatusDesc(title, name, desc) {
-	console.log(title + ' ' + name + ' ' + desc);
-	// $.ajax({
-	// 	url: 'data/activity.mapping.update.php',
-	// 	data: {	type: 'info', id: statusId, name: name, desc: desc}
-	// })
-	// .done(function( e ) {
-	// 	console.log( "success: " + e );
-	// 	$( '#name_form' ).addClass('has-success').addClass('has-feedback')
-	// 	$( '#feedbackSuccess_name' ).fadeIn('slow');
-	// 	$( '#inputSuccess3Status_name' ).fadeIn('slow');
-	// 	$( '#feedbackSuccess_name' ).delay( 300 ).fadeOut('slow');
-	// 	$( '#inputSuccess3Status_name' ).delay( 300 ).fadeOut('slow', function() {
-	// 		$( '#name_form' ).removeClass('has-success').fadeIn('fast');
-	// 	});
-	// 	$( '#desc_form' ).addClass('has-success').addClass('has-feedback')
-	// 	$( '#feedbackSuccess_desc' ).fadeIn('slow');
-	// 	$( '#inputSuccess3Status_desc' ).fadeIn('slow');
-	// 	$( '#feedbackSuccess_desc' ).delay( 300 ).fadeOut('slow');
-	// 	$( '#inputSuccess3Status_desc' ).delay( 300 ).fadeOut('slow', function() {
-	// 		$( '#desc_form' ).removeClass('has-success').fadeIn('fast');
-	// 	});
-	// })
-	// .fail(function( e ) {
-	// 	console.log(e);
-	// })
+function updateStatusDesc(id, action_type, action_title, action_name, action_description) {
+	$.ajax({
+		url: 'data/action.mapping.update.php',
+		data: {	type: 'info', id: id, action_type: action_type, action_title: action_title, action_name: action_name, action_description: action_description}
+	})
+	.done(function( e ) {
+		console.log( "success: " + e );
+		$( '#action_title' ).parent().addClass('has-success');
+		$( '#action_description' ).parent().addClass('has-success');
+		$( '#action_name' ).parent().addClass('has-success');
+		setTimeout(function () {
+		$( '#action_title' ).parent().removeClass('has-success');
+		$( '#action_description' ).parent().removeClass('has-success');
+		$( '#action_name' ).parent().removeClass('has-success');
+        }, 1000);
+	})
+	.fail(function( e ) {
+		console.log(e);
+	})
 	
 }
 
 
-function updateRule(id, value, assign, action) {
-	console.log(id + ' ' + value + ' ' + assign + ' ' + action);
-	// $.ajax({
-	// 	url: 'data/activity.mapping.update.php', // TODO
-	// 	data: {	type: 'rule', id: id, value: value, assign: assign, action: action}
-	// })
-	// .done(function( e ) {
-	// 	console.log( "success: " + e );
-	// 	$( '#'+id ).addClass('has-success')
-	// 	$( '#'+id ).next().addClass('has-success')
-	// 	$( '#ok_' +id ).fadeIn()
-	// 	setTimeout(function () {
- //            $( '#'+id ).removeClass('has-success');
- //            $( '#'+id ).next().removeClass('has-success')
- //            $( '#ok_' +id ).fadeOut()
- //        }, 2000);
+function updateField(data) {
+	console.log('updating...');
+	console.log(data);
+	var id = data.field_id;
+	delete data["field_id"]
+	$.ajax({
+		url: 'data/action.mapping.update.php', // TODO
+		data: {	type: 'field', id: id, data: data}
+	})
+	.done(function( e ) {
+		console.log( "success: " + e );
+		$( '#'+id ).parent().find( 'input,select' ).parent().addClass('has-success');
+		$( '#ok_' +id ).fadeIn()
+		setTimeout(function () {
+            $( '#'+id ).parent().find( 'input,select' ).parent().removeClass('has-success');
+            $( '#ok_' +id ).fadeOut()
+        }, 1000);
 
-	// })
-	// .fail(function( e ) {
-	// 	console.log( "error" + e );
-	// 	$( '#'+id ).addClass('has-error');
-	// 	$( '#'+id ).next().addClass('has-error');
-	// 	$( '#err_' +id ).fadeIn()
-	// 	setTimeout(function () {
-	// 		$( '#'+id ).removeClass('has-error');
-	// 		$( '#'+id ).next().removeClass('has-error');
-	// 		$( '#err_' +id ).fadeOut()
-	// 	}, 2000);
-	// })
+	})
+	.fail(function( e ) {
+		// console.log( "error" + e );
+		$( '#'+id ).parent().find( 'input,select' ).parent().addClass('has-error');
+		$( '#err_' +id ).fadeIn()
+		setTimeout(function () {
+            $( '#'+id ).parent().find( 'input,select' ).parent().removeClass('has-error');
+            $( '#err_' +id ).fadeOut()
+        }, 1000);
+	})
 	
 }
 
@@ -75,27 +69,27 @@ function removeRule(input) {
 	switch (idType) {
 	 	case 'editRule':
 	 		console.log('delete: EDIT');
-	 		// $.ajax({
-	 		// 	url: 'data/activity.mapping.update.php',
-	 		// 	data: {	type: 'delete', id: id}
-	 		// })
-	 		// .done(function( e ) {
-	 		// 	console.log( "success: " + e );
-	 		// 	$('#' + id).parent().fadeOut('slow', function(){
-	 		// 		$('#' + id).parent().remove()
-	 		// 	})
-	 		// })
-	 		// .fail(function( e ) {
-	 		// 	console.log( "error" + e );
-				// $( '#'+id ).addClass('has-error');
-				// $( '#'+id ).next().addClass('has-error');
-				// $( '#err_' +id ).fadeIn()
-				// setTimeout(function () {
-				// 	$( '#'+id ).removeClass('has-error');
-				// 	$( '#'+id ).next().removeClass('has-error');
-				// 	$( '#err_' +id ).fadeOut()
-				// }, 2000);
-	 		// })
+	 		$.ajax({
+	 			url: 'data/action.mapping.update.php',
+	 			data: {	type: 'delete', id: id}
+	 		})
+	 		.done(function( e ) {
+	 			console.log( "success: " + e );
+	 			$('#' + id).parent().fadeOut('slow', function(){
+	 				$('#' + id).parent().remove()
+	 			})
+	 		})
+	 		.fail(function( e ) {
+	 			console.log( "error" + e );
+				$( '#'+id ).addClass('has-error');
+				$( '#'+id ).next().addClass('has-error');
+				$( '#err_' +id ).fadeIn()
+				setTimeout(function () {
+					$( '#'+id ).removeClass('has-error');
+					$( '#'+id ).next().removeClass('has-error');
+					$( '#err_' +id ).fadeOut()
+				}, 2000);
+	 		})
 	 		break;
 	 	case 'addRule':
 	 		//
@@ -108,32 +102,30 @@ function removeRule(input) {
 	 }
 }
 
-function addRule(id, valueTo, valueFrom, assign, set, action) {
-
-	console.log(id + ' ' + valueTo + ' ' + valueFrom + ' ' + assign + ' ' + set + ' ' + action);
-	// $.ajax({
-	// 	url: 'data/activity.mapping.update.php',
-	// 	data: {	type: 'addRule',toStage: valueTo, fromStage: valueFrom, assign: assign, set: set}
-	// })
-	// .done(function( e ) {
-	// 	console.log( "addRule: success: " + e );
-	// 	$( '#' + id ).find( 'select' ).attr('disabled', true);
-	// 	$( '#' + id ).next().find( 'select' ).attr('disabled', true);
-	// 	$( '#' + id ).next().next().find( 'input' ).attr('disabled', true);
-	// 	$( '#' + id ).next().next().next().find( 'button' ).attr('disabled', true);
-	// 	location.reload();
-	// })
-	// .fail(function( e ) {
-	// 	$( '#'+id ).addClass('has-error');
-	// 	$( '#'+id ).next().addClass('has-error');
-	// 	$( '#err_' +id ).fadeIn()
-	// 	setTimeout(function () {
-	// 		$( '#'+id ).removeClass('has-error');
-	// 		$( '#'+id ).next().removeClass('has-error');
-	// 		$( '#err_' +id ).fadeOut()
-	// 	}, 2000);
-	// 	console.log( "addRule: error" + e );
-	// })
+function addField(id, data) {
+	console.log('adding...');
+	console.log(data);
+	console.log(id);
+	$.ajax({
+		url: 'data/action.mapping.update.php',
+		data: {	type: 'addRule',data: data}
+	})
+	.done(function( e ) {
+		console.log( "addRule: success: " + e );
+		$( '#'+id ).parent().find( 'select' ).attr('disabled', true);
+		$( '#'+id ).parent().find( 'input' ).attr('disabled', true);
+		$( '#'+id ).parent().find( 'button' ).attr('disabled', true);
+		location.reload();
+	})
+	.fail(function( e ) {
+		$( '#'+id ).parent().find( 'input,select' ).parent().addClass('has-error');
+		$( '#err_' +id ).fadeIn()
+		setTimeout(function () {
+			$( '#'+id ).parent().find( 'input,select' ).parent().removeClass('has-error');
+			$( '#err_' +id ).fadeOut()
+		}, 2000);
+		console.log( "addRule: error" + e );
+	})
 }
 
 function update() {
@@ -142,49 +134,34 @@ function update() {
     updateDescRequired = false;
     requireUpdateRule = false;
 	updateData = {
-		title: $( '#title' ).val(),
-		name: $( '#name' ).val(),
-		desc: $( '#description' ).val(),
+		action_title: $( '#action_title' ).val(),
+		action_name: $( '#action_name' ).val(),
+		action_description: $( '#action_description' ).val(),
 		rules: []
 	}
     $( '.editRule' ).each(function(index, el) {
 		var id = $(el).find( 'div' ).attr( "id" );
-		var field_id = id;
-		var action_id = id;
-		var field_name = $( '#field_name_' + id ).val();
-		var field_name_display = $( '#field_name_display_' + id ).val();
-		var field_prefix = $( '#field_prefix_' + id ).val();
-		var field_suffix = $( '#field_suffix_' + id ).val();
-		var data_required = $( '#data_required_' + id ).is(':checked');
-		var data_child_of = $( '#data_child_of_' + id ).val();
-		var data_type = $( '#data_type_' + id ).val();
-		var data_validation = $( '#data_validation_' + id ).val();
-		var data_placeholder = $( '#data_placeholder_' + id ).val();
-		var data_validation_helper = $( '#data_validation_helper_' + id ).val();
-		var source_table = $( '#source_table_' + id ).val();
-		var source_prefill = $( '#source_prefill_' + id ).is(':checked');
-		updateData['rules'].push({
-			field_id: field_id,
-			action_id: action_id,
-			field_name: field_name,
-			field_name_display: field_name_display,
-			field_prefix: field_prefix,
-			field_suffix: field_suffix,
-			data_required: data_required,
-			data_child_of: data_child_of,
-			data_type: data_type,
-			data_validation: data_validation,
-			data_placeholder: data_placeholder,
-			data_validation_helper: data_validation_helper,
-			source_table: source_table,
-			source_prefill: source_prefill
-		});
+		var test = {};
+		if(id != 'xx') {
+			$( "input[id$="+id+"],select[id$="+id+"]" ).each(function(index, val){
+				var ellement = $(val);
+				var key = ellement.attr('id').replace('_'+id,'');
+				if(ellement.attr('type') == 'checkbox'){
+					var value = ellement.is(':checked');
+				} else{
+					var value = ellement.val();
+				}
+				test[key] = value;
+			})
+			updateData['rules'].push(test);
+		}
 	});
-console.log( updateData );
+	console.log( 'updateData' );
+	console.log( updateData );
 
 	//check if the name or description have chnaged, update if required
-	if(updateData['name'] != initialData['name'] || updateData['desc'] != initialData['desc'] || updateData['title'] != initialData['title']) {
-		updateStatusDesc(updateData['title'], updateData['name'], updateData['desc'])
+	if(updateData['action_name'] != initialData['action_name'] || updateData['action_description'] != initialData['action_description'] || updateData['action_title'] != initialData['action_title']) {
+		updateStatusDesc($( '#action_id' ).val(), $( '#action_type' ).val(), updateData['action_title'], updateData['action_name'], updateData['action_description'])
 	}
 
 	// loop all rules to check for changes
@@ -196,48 +173,30 @@ console.log( updateData );
 			}
 		});
 		if(requireUpdateRule) {
-			updateRule(updateData['rules'][index].id, updateData['rules'][index].value, updateData['rules'][index].assign, updateData['rules'][index].action);
+			updateField(updateData['rules'][index]);
 			requireUpdateRule = false;
 		}
 	});
 
 	// Look for any additional rules that might have been created and add them
 	$.each($('.addRule'), function(index, el) {
-		data = {};
 		var id = $(el).find( 'div' ).attr( "id" );
+		var data = {};
 		if(id != 'xx') {
-		var id = $(el).find( 'div' ).attr( "id" );
-		var field_id = id;
-		var action_id = id;
-		var field_name = $( '#field_name_' + id ).val();
-		var field_name_display = $( '#field_name_display_' + id ).val();
-		var field_prefix = $( '#field_prefix_' + id ).val();
-		var field_suffix = $( '#field_suffix_' + id ).val();
-		var data_required = $( '#data_required_' + id ).is(':checked');
-		var data_child_of = $( '#data_child_of_' + id ).val();
-		var data_type = $( '#data_type_' + id ).val();
-		var data_validation = $( '#data_validation_' + id ).val();
-		var data_placeholder = $( '#data_placeholder_' + id ).val();
-		var data_validation_helper = $( '#data_validation_helper_' + id ).val();
-		var source_table = $( '#source_table_' + id ).val();
-		var source_prefill = $( '#source_prefill_' + id ).is(':checked');
-		data.push({
-			field_id: field_id,
-			action_id: action_id,
-			field_name: field_name,
-			field_name_display: field_name_display,
-			field_prefix: field_prefix,
-			field_suffix: field_suffix,
-			data_required: data_required,
-			data_child_of: data_child_of,
-			data_type: data_type,
-			data_validation: data_validation,
-			data_placeholder: data_placeholder,
-			data_validation_helper: data_validation_helper,
-			source_table: source_table,
-			source_prefill: source_prefill
-		});
-			addField(id, stage, $( '#currentStage' ).html(), assign, ruleSet, action)
+			$( "input[id$="+id+"],select[id$="+id+"]" ).each(function(index, val){
+				var ellement = $(val);
+				var key = ellement.attr('id').replace('_'+id,'');
+				if(key != 'field_id'){
+					if(ellement.attr('type') == 'checkbox'){
+						var value = ellement.is(':checked');
+					} else{
+						var value = ellement.val();
+					}
+					data[key] = value;					
+				}
+
+			})
+			addField(id, data)
 		}
 	});
 
@@ -248,44 +207,29 @@ console.log( updateData );
 function setBase() {
 //Set initial values
 	initialData = {
-		title: $( '#title' ).val(),
-		name: $( '#name' ).val(),
-		desc: $( '#description' ).val(),
+		action_title: $( '#action_title' ).val(),
+		action_name: $( '#action_name' ).val(),
+		action_description: $( '#action_description' ).val(),
 		rules: []
 	}
     $( '.editRule' ).each(function(index, el) {
 		var id = $(el).find( 'div' ).attr( "id" );
-		var field_id = id;
-		var action_id = id;
-		var field_name = $( '#field_name_' + id ).val();
-		var field_name_display = $( '#field_name_display_' + id ).val();
-		var field_prefix = $( '#field_prefix_' + id ).val();
-		var field_suffix = $( '#field_suffix_' + id ).val();
-		var data_required = $( '#data_required_' + id ).is(':checked');
-		var data_child_of = $( '#data_child_of_' + id ).val();
-		var data_type = $( '#data_type_' + id ).val();
-		var data_validation = $( '#data_validation_' + id ).val();
-		var data_placeholder = $( '#data_placeholder_' + id ).val();
-		var data_validation_helper = $( '#data_validation_helper_' + id ).val();
-		var source_table = $( '#source_table_' + id ).val();
-		var source_prefill = $( '#source_prefill_' + id ).is(':checked');
-		initialData['rules'].push({
-			field_id: field_id,
-			action_id: action_id,
-			field_name: field_name,
-			field_name_display: field_name_display,
-			field_prefix: field_prefix,
-			field_suffix: field_suffix,
-			data_required: data_required,
-			data_child_of: data_child_of,
-			data_type: data_type,
-			data_validation: data_validation,
-			data_placeholder: data_placeholder,
-			data_validation_helper: data_validation_helper,
-			source_table: source_table,
-			source_prefill: source_prefill
-		});
+		var test = {};
+		if(id != 'xx') {
+			$( "input[id$="+id+"],select[id$="+id+"]" ).each(function(index, val){
+				var ellement = $(val);
+				var key = ellement.attr('id').replace('_'+id,'');
+				if(ellement.attr('type') == 'checkbox'){
+					var value = ellement.is(':checked');
+				} else{
+					var value = ellement.val();
+				}
+				test[key] = value;
+			})
+			initialData['rules'].push(test);
+		}
 	});
+	console.log( 'initialData' );
 	console.log( initialData );
 }
 
@@ -297,7 +241,7 @@ function setUpdates() {
 		actVal = actButton.val()
 		console.log( staButton.val() );
 		// $.ajax({
-		// 	url: 'data/activity.data.lookup.php',
+		// 	url: 'data/action.mapping.update.php',
 		// 	dataType: 'JSON',
 		// 	data: {	type: 'getStatuses',
 		// 			key: actVal},
