@@ -209,9 +209,29 @@ function setBase() {
 function setUpdates() {
 	$( '.activity' ).unbind();
 	$( '.activity' ).change(function( e ){ 
-		console.log( e );
-		console.log( e.target );
-
+		var actButton = $(e.target)
+		var staButton = $(e.target).parent().parent().find( '.status' )
+		actVal = actButton.val()
+		console.log( staButton.val() );
+		$.ajax({
+			url: 'data/activity.data.lookup.php',
+			dataType: 'JSON',
+			data: {	type: 'getStatuses',
+					key: actVal},
+		})
+		.done(function( data ) {
+			console.log("success");
+			console.log( data );
+			var optionsAsString = "<option disabled selected value=''>Status</option>";
+			$.each(data, function(index, value){
+				optionsAsString += "<option value='" + value + "'>" + value + "</option>";
+			})
+			staButton.html( optionsAsString )
+		})
+		.fail(function( data) {
+			staButton.html( "<option disabled selected value=''>Status</option>" )
+			console.log("error");
+		})
 	});
 }
 

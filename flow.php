@@ -1,7 +1,7 @@
 <?php 
 require_once('php/templates/header.php');
 if(!$user->isLoggedIn()){
-    Redirect::to('login.php?nexturl=activity.php');
+    Redirect::to('login.php?nexturl=flow.php');
 }
 ?>
 <div class="page-header">
@@ -12,9 +12,8 @@ if($stage = Input::get('stage')){
 	if(!$user->hasPermission('admin')){
 	    Redirect::to('flow.php');
 	}
-	$test = explode (',', $stage);
+
 	// Show info fopr selected stage
-	
 	$stageInfo = Activity::splitStage($stage, ',');
 	$act = $stageInfo['activity'];
 	$status = $stageInfo['status'];
@@ -188,7 +187,7 @@ if($stage = Input::get('stage')){
 	  <label class="control-label col-sm-1 " for="activity_xx">Destination</label>
 	  <div class="col-sm-1">
 	  <select  class="form-control activity" id="activity_xx" >
-		<option  value="" disabled >Activity</option>
+		<option  value="" disabled selected>Activity</option>
 		<?php
 			$url = $_SERVER['HTTP_HOST'] . '/data/activity.data.lookup.php?type=getActivities';
 			$activities = json_decode(getUrlContent($url));
@@ -200,7 +199,7 @@ if($stage = Input::get('stage')){
 	  </div>			  
 	  <div class="col-sm-1">
 	  <select type="text" class="form-control status" id="status_xx">
-		  <option class="status" value="" disabled >Status</option>
+		  <option class="status" value="" disabled selected>Status</option>
 			<?php
 				$url = $_SERVER['HTTP_HOST'] . '/data/activity.data.lookup.php?type=getStatuses&key=' . $rule['activity'];
 				$activities = json_decode(getUrlContent($url));
@@ -250,7 +249,7 @@ if($stage = Input::get('stage')){
 	<hr>
 </div>
 
-<!-- clonable form -->
+<!-- clonable form END -->
 <?php
 require_once('php/templates/footer.php');
 ?>

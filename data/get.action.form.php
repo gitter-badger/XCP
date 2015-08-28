@@ -81,7 +81,7 @@ foreach ($actionFields as $fieldInfo => $value) {
 
 
 $out = $arrayName = array('form' => $text,
-						'title' => $actionInfo->action_name,
+						'title' => $actionInfo->action_title,
 						'intro' => $actionInfo->action_description
 					 );
 

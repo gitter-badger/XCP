@@ -582,22 +582,52 @@ class Activity {
 		$sql = "SELECT * FROM [ACT_STATUS_2] WHERE act = '$activity'";
 		$data = $db->query($sql);
 		$data = $data->results();
-		$out[] = '*';
-		foreach ($data as $key => $activity) {
-			$out[] = str_pad($activity->status, 2, '0', STR_PAD_LEFT);
+		if(!empty($data)) {
+			$out[] = '*';
+			foreach ($data as $key => $activity) {
+				$out[] = str_pad($activity->status, 2, '0', STR_PAD_LEFT);
+			}
 		}
 		return $out;
 	}
 
-	public static function listActions() {
+	public static function listActions($action = null) {
 		
 		$db = DB::getInstance();
 		$sql = "SELECT * FROM [ACTION_LIST]";
 		$data = $db->query($sql);
 		$data = $data->results();
 		foreach ($data as $key => $activity) {
-			$out[] = array('id' => $activity->action_id, 'name' => $activity->action_name);
-			#$out[] = $activity->action_id;
+			if($action){
+				if($action == $activity->action_id) {
+					return array(	'id' => $activity->action_id, 
+									'name' => $activity->action_name, 
+									'title' => $activity->action_title, 
+									'description' => $activity->action_description, 
+									'type' => $activity->action_type);
+				}
+			}else{
+				$out[] = array(	'id' => $activity->action_id, 
+								'name' => $activity->action_name, 
+								'title' => $activity->action_title, 
+								'description' => $activity->action_description, 
+								'type' => $activity->action_type);
+			}
+		}
+		return $out;
+	}
+
+	public static function listActionFields($action) {
+		
+		$db = DB::getInstance();
+		$sql = "SELECT * FROM [ACTION_FIELDS] WHERE action_id = $action";
+		$data = $db->query($sql);
+		$data = $data->results();
+		foreach ($data as $key => $fields) {
+			foreach ($fields as $field => $value) {
+			 	$littleArray[$field] = $value;
+			 }
+			 $out[] = $littleArray;
 		}
 		return $out;
 	}
