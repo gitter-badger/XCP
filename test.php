@@ -6,7 +6,7 @@ $test = new Activity($xcpid);
 echo "<pre>XCP_ID: " . $xcpid . "<br>";
 echo "ACT: " . $test->getCurrentActivity() . ":" . $test->getCurrentStatus() . "<br>";
 
-print_r(Activity::validateItemData(TAT, ''));
+print_r(Activity::listActionFields(1));
 
 //print_r(Activity::showFieldData('TAT'));
 
