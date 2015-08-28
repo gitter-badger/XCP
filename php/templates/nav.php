@@ -17,21 +17,22 @@
          <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Exclusions <span class="caret"></span></a>
           <ul class="dropdown-menu">
-            <li <?php echoActiveClassIfRequestMatches("addexclution"); ?>><a href="addexclution.php" >Exclude Content</a></li>
-            <li <?php echoActiveClassIfRequestMatches("viewexclution"); ?>><a href="viewexclution.php" >View Excluded Content</a></li>
+            <li <?php echoActiveClassIfRequestMatches("addexclution"); ?>><a href="addexclution.php" ><i class="fa fa-times"></i> Exclude Content</a></li>
+            <li <?php echoActiveClassIfRequestMatches("viewexclution"); ?>><a href="viewexclution.php" ><i class="fa fa-eye"></i> View Excluded Content</a></li>
           </ul>
         </li>
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Admin <span class="caret"></span></a>
           <ul class="dropdown-menu">
             <li <?php echoActiveClassIfRequestMatches("flow"); ?>><a href="flow.php" ><i class="fa fa-random"></i> Manage Activity Flow</a></li>
-            <li <?php echoActiveClassIfRequestMatches("dumpAudit"); ?>><a href="dumpAudit.php"><i class="fa fa-download"></i> Dump Audit (xls)</a></li>
+            <li <?php echoActiveClassIfRequestMatches("actionmanager"); ?>><a href="actionmanager.php" ><i class="fa fa-table"></i> Action Manager</a></li>
+            <li <?php echoActiveClassIfRequestMatches("dumpAudit"); ?>><a href="dumpAudit.php"><i class="fa fa-download"></i> Dump Audit (NOT WORKING)</a></li>
           </ul>
         </li>
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Reports <span class="caret"></span></a>
           <ul class="dropdown-menu">
-            <li <?php echoActiveClassIfRequestMatches("rep"); ?>><a href="rep.php" ><i class="fa fa-random"></i> Test reports</a></li>
+            <li <?php echoActiveClassIfRequestMatches("rep"); ?>><a href="rep.php" ><i class="fa fa-bar-chart"></i> Test reports</a></li>
           </ul>
         </li>
       </ul>
