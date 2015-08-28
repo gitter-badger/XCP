@@ -29,6 +29,21 @@ function updateStatusDesc(id, action_type, action_title, action_name, action_des
 	
 }
 
+function newAction(){
+	$.ajax({
+		url: 'data/activity.data.lookup.php',
+		data: {type: 'getNewAction'},
+	})
+	.done(function( id ) {
+		console.log("success");
+   		window.location.href = window.location.href + "?id=" + id;
+
+	})
+	.fail(function() {
+		console.log("error");
+	})
+	
+}
 
 function updateField(data) {
 	console.log('updating...');

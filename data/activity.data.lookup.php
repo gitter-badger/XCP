@@ -50,6 +50,10 @@ switch ($type) {
 			$out = Activity::listActions();
 		break;
 
+	case 'getNewAction':
+			$out = Activity::getNewAction();
+		break;
+
 	default:
 		$out = false;
 		break;

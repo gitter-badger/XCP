@@ -23,8 +23,8 @@ $GLOBALS['config'] = array(
 		'token_name' => 'token',
 	),
 	'release' => array(
-		'version' => 'v1.2-beta.1',
-		'date' => '2015-08-14',
+		'version' => 'v1.2.1-beta.1',
+		'date' => '2015-08-28',
 	),
 );
 // Include Composer files..

@@ -3,16 +3,16 @@ require_once('php/templates/header.php');
 if(!$user->isLoggedIn()){
     Redirect::to('login.php?nexturl=flow.php');
 }
-?>
-<div class="page-header">
-<h1>Edit Action</h1>
-</div>
-<?php 
 if($id = Input::get('id')){
 	if(!$user->hasPermission('admin')){
 	    Redirect::to('flow.php');
 	}
 	// Show info fopr selected action
+	?>
+	<div class="page-header">
+	<h1>Edit Action</h1>
+	</div>
+	<?php
 	$actionInfo = Activity::listActions($id);
 	$fieldInfo = Activity::listActionFields($id);
 	$dataTypes = array( 1 =>  'text',
@@ -169,13 +169,18 @@ if($id = Input::get('id')){
 		echo 'Uh Oh, thats not the right action type';
 	}
 } else {
+	?>
+<div class="page-header">
+<h1>Edit Action <button type="button" onclick="newAction()" class="btn btn-primary"><i class="fa fa-plus"></i> Add Action</button></h1>
+</div>
+	<?php
 	// Show list of ACT and STAT
 	$actionInfo = Activity::listActions();
 	echo '<table class="table table-hover"><thead>';
 	if($user->hasPermission('admin')){
 				$editHead = '<th class="col-md-1"></th>';
 	}
-	echo '<tr><th class="col-md-1">ID</th><th class="col-md-1">Type</th><th class="col-md-1">Name</th><th class="col-md-1">Title</th><th class="col-md-6">Description</th>' . $editHead . '</tr></thead>';
+	echo '<tr><th class="col-md-1">ID</th><th class="col-md-1">Type</th><th class="col-md-1">Name</th><th class="col-md-1">Title</th><th class="col-md-5">Description</th>' . $editHead . '</tr></thead>';
 	foreach ($actionInfo as $key => $value) {
 			
 			if($user->hasPermission('admin')){

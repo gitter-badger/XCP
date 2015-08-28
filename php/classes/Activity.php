@@ -709,4 +709,10 @@ class Activity {
 		}
 	}
 
+	public static function getNewAction() {
+		$db = DB::getInstance();
+		$db->query("SELECT TOP 1 action_id FROM ACTION_LIST order by action_id desc");
+		return $db->first()->action_id + 1;
+	}
+
 }
