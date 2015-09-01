@@ -219,6 +219,7 @@ if(count($items) > 0) {
 	    $mail->addAddress('JNemis@INNODATA.COM'); 
 	    $mail->addAddress('LGoboy@INNODATA.COM');
 	    $mail->addAddress('content.operations@bsigroup.com'); 
+	    $mail->addAddress('gcmontesclaros@INNODATA.COM'); 
 
 	    $mail->isHTML(true); 
 
@@ -267,8 +268,7 @@ if(count($items) > 0) {
 
     $mail->addAddress('content.operations@bsigroup.com'); 
     $mail->addAddress('APradeep@innodata.com'); 
-    $mail->addAddress('MMontano@INNODATA.COM'); 
-    $mail->addAddress('LGoboy@INNODATA.COM
+    $mail->addAddress('LGoboy@INNODATA.COM');
 
     $mail->isHTML(true); 
 
