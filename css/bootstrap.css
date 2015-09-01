@@ -2910,6 +2910,12 @@ select[multiple].form-group-lg .form-control {
   margin-bottom: 10px;
   color: #737373;
 }
+.error-block {
+  display: block;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  color: #A94442;
+}
 @media (min-width: 768px) {
   .form-inline .form-group {
     display: inline-block;
@@ -5829,11 +5835,11 @@ button.close {
   margin-left: 0;
 }
 .modal-scrollbar-measure {
-  position: absolute;
-  top: -9999px;
-  width: 50px;
-  height: 50px;
-  overflow: scroll;
+  //position: absolute;
+  //top: -9999px;
+  //width: 50px;
+  //height: 50px;
+  //overflow: scroll;
 }
 @media (min-width: 768px) {
   .modal-dialog {

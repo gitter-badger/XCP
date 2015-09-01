@@ -1,17 +1,7 @@
 count = 1 
 function addRuleInput(ruleset) {
-test = 	'<div class="form-group add" id="add_'+count+'">'+
-		'<label for="description" class="col-sm-2 control-label">' + $( 'h3' ).html() + ' => </label>' +
-	    '<div class="col-sm-2">' +
-	    '<div class="input-group">'+
-		'<input name="ruleset_'+ruleset+'" value="" type="text" class="form-control" id="description">'+
-		'<span class="input-group-btn">'+
-		'<button type="button" onclick="removeRule(\'add_'+count+'\')" class="btn"><i class="fa fw fa-trash"></i></button>'+
-		'</span>'+
-		'</div>'+
-		'<div class="checkbox"><label><input name="add" type="checkbox" value="">Persist assignment</label></div>'+
-		'</div></div>'
-	$( '.ruleset_' + ruleset ).append(test);
+	$( '#xx' ).parent().clone().appendTo($( '.ruleset_' + ruleset )).html(function(index,html){return html.replace(/xx/g,"a" + count).replace(/yy/g, ruleset);}).fadeIn()
+	setUpdates();
 	count = count + 1;
 }
 
@@ -45,31 +35,34 @@ function updateStatusDesc(statusId, name, desc) {
 }
 
 
-function updateRule(id, value, assign) {
-	console.log(id + ' ' + value + ' ' + assign);
+function updateRule(id, value, assign, action) {
+	console.log(id + ' ' + value + ' ' + assign + ' ' + action);
 	$.ajax({
-		url: 'data/activity.mapping.update.php',
-		data: {	type: 'rule', id: id, value: value, assign: assign}
+		url: 'data/activity.mapping.update.php', // TODO
+		data: {	type: 'rule', id: id, value: value, assign: assign, action: action}
 	})
 	.done(function( e ) {
 		console.log( "success: " + e );
-		$( '#editRule_'+id ).addClass('has-success').addClass('has-feedback')
-		$( '#feedbackSuccess_'+id ).fadeIn('slow');
-		$( '#inputSuccess3Status_'+id ).fadeIn('slow');
-		$( '#feedbackSuccess_'+id ).delay( 300 ).fadeOut('slow');
-		$( '#inputSuccess3Status_'+id ).delay( 300 ).fadeOut('slow', function() {
-			$( '#editRule_'+id ).removeClass('has-success').fadeIn('fast');
-		});
+		$( '#'+id ).addClass('has-success')
+		$( '#'+id ).next().addClass('has-success')
+		$( '#ok_' +id ).fadeIn()
+		setTimeout(function () {
+            $( '#'+id ).removeClass('has-success');
+            $( '#'+id ).next().removeClass('has-success')
+            $( '#ok_' +id ).fadeOut()
+        }, 2000);
+
 	})
 	.fail(function( e ) {
 		console.log( "error" + e );
-		$( '#editRule_'+id ).addClass('has-error').addClass('has-feedback')
-		$( '#feedbackError_'+id ).fadeIn('slow');
-		$( '#inputError2Status_'+id ).fadeIn('slow');
-		$( '#feedbackError_'+id ).delay( 300 ).fadeOut('slow');
-		$( '#inputError2Status_'+id ).delay( 300 ).fadeOut('slow', function() {
-			$( '#editRule_'+id ).removeClass('has-error').fadeIn('fast');
-		});
+		$( '#'+id ).addClass('has-error');
+		$( '#'+id ).next().addClass('has-error');
+		$( '#err_' +id ).fadeIn()
+		setTimeout(function () {
+			$( '#'+id ).removeClass('has-error');
+			$( '#'+id ).next().removeClass('has-error');
+			$( '#err_' +id ).fadeOut()
+		}, 2000);
 	})
 	
 }
@@ -77,50 +70,74 @@ function updateRule(id, value, assign) {
 function removeRule(input) {
 	var id = input.split("_")[1];
 	var idType = input.split("_")[0];
+	console.log(id);
+	console.log(idType);
 	switch (idType) {
-		case 'editRule':
-			console.log('delete: EDIT');
-			$.ajax({
-				url: 'data/activity.mapping.update.php',
-				data: {	type: 'delete', id: id}
-			})
-			.done(function( e ) {
-				console.log( "success: " + e );
-				$('#' + input).fadeOut('slow').remove()
-			})
-			.fail(function( e ) {
-				console.log( "error" + e );
-			})
-			break;
-		case 'add':
-			//
+	 	case 'editRule':
+	 		console.log('delete: EDIT');
+	 		$.ajax({
+	 			url: 'data/activity.mapping.update.php',
+	 			data: {	type: 'delete', id: id}
+	 		})
+	 		.done(function( e ) {
+	 			console.log( "success: " + e );
+	 			$('#' + id).parent().fadeOut('slow', function(){
+	 				$('#' + id).parent().remove()
+	 			})
+	 		})
+	 		.fail(function( e ) {
+	 			console.log( "error" + e );
+				$( '#'+id ).addClass('has-error');
+				$( '#'+id ).next().addClass('has-error');
+				$( '#err_' +id ).fadeIn()
+				setTimeout(function () {
+					$( '#'+id ).removeClass('has-error');
+					$( '#'+id ).next().removeClass('has-error');
+					$( '#err_' +id ).fadeOut()
+				}, 2000);
+	 		})
+	 		break;
+	 	case 'addRule':
+	 		//
 			console.log('delete: ' + id);
-			$('#' + input).fadeOut('slow').remove()
+			$('#' + id).parent().fadeOut('300', function(){
+				$('#' + id).parent().remove();
+			})
 			setBase()
 			break;
-	}
+	 }
 }
 
-function addRule(id, valueTo, valueFrom, assign, set) {
+function addRule(id, valueTo, valueFrom, assign, set, action) {
 
-	console.log(id + ' ' + valueTo + ' ' + valueFrom + ' ' + assign + ' ' + set);
+	console.log(id + ' ' + valueTo + ' ' + valueFrom + ' ' + assign + ' ' + set + ' ' + action);
 	$.ajax({
 		url: 'data/activity.mapping.update.php',
 		data: {	type: 'addRule',toStage: valueTo, fromStage: valueFrom, assign: assign, set: set}
 	})
 	.done(function( e ) {
 		console.log( "addRule: success: " + e );
-		$( '#'+id+' > div > div > input' ).attr('readonly', true);
-		$( '#'+id+' > div > div > label > input' ).attr('disabled', true);
-		$( '#'+id+' > div > div > span > button' ).attr('disabled', true);
+		$( '#' + id ).find( 'select' ).attr('disabled', true);
+		$( '#' + id ).next().find( 'select' ).attr('disabled', true);
+		$( '#' + id ).next().next().find( 'input' ).attr('disabled', true);
+		$( '#' + id ).next().next().next().find( 'button' ).attr('disabled', true);
 		location.reload();
 	})
 	.fail(function( e ) {
+		$( '#'+id ).addClass('has-error');
+		$( '#'+id ).next().addClass('has-error');
+		$( '#err_' +id ).fadeIn()
+		setTimeout(function () {
+			$( '#'+id ).removeClass('has-error');
+			$( '#'+id ).next().removeClass('has-error');
+			$( '#err_' +id ).fadeOut()
+		}, 2000);
 		console.log( "addRule: error" + e );
 	})
 }
 
 function update() {
+
     //Set updated values
     updateDescRequired = false;
     requireUpdateRule = false;
@@ -130,34 +147,49 @@ function update() {
 		desc: $( '#description' ).val(),
 		rules: []
 	}
-    $( '.editRule > .form-group' ).each(function(index, el) {
-		var id = $(el).attr( "id" );
-		var value = $( '#'+id+' > div > div > input' ).val();
-		var assign = $( '#'+id+' > div > div > label > input' ).is(':checked')
-		updateData['rules'].push({id: id, value: value, assign: assign});
+    $( '.editRule' ).each(function(index, el) {
+		var id = $(el).find( 'div' ).attr( "id" );
+		var action = $( '#action_' + id ).val();
+		var stage  = $( '#activity_' + id ).val() + ':' + $( '#status_' + id ).val();
+		var assign = $( '#assign_' + id ).is(':checked');
+		updateData['rules'].push({id: id, value: stage, assign: assign, action: action});
 	});
+
+	//check if the name or description have chnaged, update if required
 	if(updateData['name'] != initialData['name'] || updateData['desc'] != initialData['desc']) {
 		updateStatusDesc(updateData['statusId'], updateData['name'], updateData['desc'])
 	}
+
+	// loop all rules to check for changes
 	$.each(updateData['rules'], function(index, item) {
 		$.each(item, function(key, item1) {
 			if(item1 != initialData['rules'][index][key]){
 				requireUpdateRule = true;
+				console.log( 'Changed' )
 			}
 		});
 		if(requireUpdateRule) {
-			updateRule(updateData['rules'][index].id.replace('editRule_',''), updateData['rules'][index].value, updateData['rules'][index].assign);
+			updateRule(updateData['rules'][index].id, updateData['rules'][index].value, updateData['rules'][index].assign, updateData['rules'][index].action);
 			requireUpdateRule = false;
 		}
 	});
-	$.each($('.add'), function(index, item) {
-		var id = $(item).attr( "id" );
-		var value = $( '#'+id+' > div > div > input' ).val();
-		var assign = $( '#'+id+' > div > div > label > input' ).is(':checked')
-		addRule(id, value, $( '#currentStage' ).html(), assign, $( '#'+id+' > div > div > input').attr('name').replace('ruleset_',''))
+
+	// Look for any additional rules that might have been created and add them
+	$.each($('.addRule'), function(index, el) {
+		var id = $(el).find( 'div' ).attr( "id" );
+		if(id != 'xx') {
+			var action = $( '#action_' + id ).val();
+			var stage  = $( '#activity_' + id ).val() + ':' + $( '#status_' + id ).val();
+			var assign = $( '#assign_' + id ).is(':checked');
+			var ruleSet = $( '#' + id ).parent().parent().attr('class').replace('ruleset_','')
+			addRule(id, stage, $( '#currentStage' ).html(), assign, ruleSet, action)
+		}
 	});
+
+	// set base data
 	setBase()
 }
+
 function setBase() {
 //Set initial values
 	initialData = {
@@ -165,14 +197,45 @@ function setBase() {
 		desc: $( '#description' ).val(),
 		rules: []
 	}
-    $( '.editRule > .form-group' ).each(function(index, el) {
-		var id = $(el).attr( "id" );
-		var value = $( '#'+id+' > div > div > input' ).val();
-		var assign = $( '#'+id+' > div > div > label > input' ).is(':checked')
-		initialData['rules'].push({id: id, value: value, assign: assign});
+    $( '.editRule' ).each(function(index, el) {
+		var id = $(el).find( 'div' ).attr( "id" );
+		var action = $( '#action_' + id ).val();
+		var stage  = $( '#activity_' + id ).val() + ':' + $( '#status_' + id ).val();
+		var assign = $( '#assign_' + id ).is(':checked');
+		initialData['rules'].push({id: id, value: stage, assign: assign, action: action});
+	});
+}
+
+function setUpdates() {
+	$( '.activity' ).unbind();
+	$( '.activity' ).change(function( e ){ 
+		var actButton = $(e.target)
+		var staButton = $(e.target).parent().parent().find( '.status' )
+		actVal = actButton.val()
+		console.log( staButton.val() );
+		$.ajax({
+			url: 'data/activity.data.lookup.php',
+			dataType: 'JSON',
+			data: {	type: 'getStatuses',
+					key: actVal},
+		})
+		.done(function( data ) {
+			console.log("success");
+			console.log( data );
+			var optionsAsString = "<option disabled selected value=''>Status</option>";
+			$.each(data, function(index, value){
+				optionsAsString += "<option value='" + value + "'>" + value + "</option>";
+			})
+			staButton.html( optionsAsString )
+		})
+		.fail(function( data) {
+			staButton.html( "<option disabled selected value=''>Status</option>" )
+			console.log("error");
+		})
 	});
 }
 
 $(function() {
-	setBase()
+	setBase();
+	setUpdates();
 });

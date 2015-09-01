@@ -6,8 +6,9 @@ switch ($type) {
 		$id = Input::get('id');
 		$value = Input::get('value');
 		$assign = Input::get('assign');
+		$action = Input::get('action');
 		try {
-			Activity::updateMappingRule($id, $value, $assign);
+			Activity::updateMappingRule($id, $value, $assign, $action);
 		} catch (Exception $e) {
 			print_r($e);
 		}
@@ -17,8 +18,9 @@ switch ($type) {
 		$fromStage = Input::get('fromStage');
 		$set = Input::get('set');
 		$assign = Input::get('assign');
+		$action = Input::get('action');
 		try {
-			Activity::addMappingRule($fromStage, $toStage, $assign, $set);
+			Activity::addMappingRule($fromStage, $toStage, $assign, $set, $action);
 		} catch (Exception $e) {
 			print_r($e);
 		}

@@ -54,7 +54,7 @@ $results = $data->results();
 			case 'mine':
 
 				$form = '<div class="dropdown" id="BUTTON_'.$result->XCPID.'">';
-				$form .= '<button onclick="getInfo(\''.$result->XCPID.'\')" class="btn btn-success btn-sm dropdown-toggle pull-right" type="button" id="actionMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+				$form .= '<button onclick="getInfo(\''.$result->XCPID.'\')" data-xcpid="'.$result->XCPID.'" class="btn btn-success btn-sm dropdown-toggle pull-right" type="button" id="actionMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
 						    Select stage
 						    <span class="caret"></span>
 						  </button>
@@ -65,7 +65,7 @@ $results = $data->results();
 						  <li class="dropdown-header">Select next stage</li><div style="margin-left: 1.5em;" class="nextContent"><i class="fa fa-spinner fa-pulse"></i></div>';
 				$form .= '<li role="separator" class="divider"></li>';
 				$form .= '<li><a href="javascript:void(0)" onclick="unassign(\''.$result->XCPID.'\')"><i class="fa fa-undo"></i> Unclaim item</a></li>';
-				#$form .= '<li><a href="javascript:void(0)" data-toggle="modal" data-target="#updateData" data-xcpid="'.$result->XCPID.'"><i class="fa fa-wrench"></i> Update Data</a></li>';
+				$form .= '<li><a href="javascript:void(0)" data-toggle="modal" data-target="#updateData" data-xcpid="'.$result->XCPID.'"><i class="fa fa-wrench"></i> Update Data</a></li>';
 				$form .='</div>';
 				break;
 			default:
