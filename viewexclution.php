@@ -2,7 +2,7 @@
 require_once 'php/templates/header.php';
 ?>
 	<div class="page-header">
-	<h1><span class="glyphicon glyphicon-th-list" aria-hidden="true"></span> View Exclutions</h1>
+	<h1><span class="glyphicon glyphicon-th-list" aria-hidden="true"></span> View Exclusions</h1>
 	</div>
 	<table id="exclutions" class="table table-hover ">
 	<thead>
