@@ -256,13 +256,8 @@ if(count($items) > 0) {
 
 	    $mail->addAddress('JNemis@INNODATA.COM'); 
 	    $mail->addAddress('LGoboy@INNODATA.COM');
-<<<<<<< HEAD
 	    $mail->addAddress('content.operations@bsigroup.com'); 
 	    $mail->addAddress('gcmontesclaros@INNODATA.COM'); 
-=======
-		$mail->AddCC('content.operations@bsigroup.com'); 
-    	//$mail->addAddress('ben.garside@bsigroup.com');
->>>>>>> origin/master
 
 	    $mail->isHTML(true); 
 
@@ -308,14 +303,9 @@ if(count($items) > 0) {
     
     $mail->AddCC('content.operations@bsigroup.com'); 
     $mail->addAddress('APradeep@innodata.com'); 
-<<<<<<< HEAD
     $mail->addAddress('LGoboy@INNODATA.COM');
-=======
-    $mail->addAddress('MMontano@INNODATA.COM'); 
-    $mail->addAddress('LGoboy@INNODATA.COM'); 
-    
     //$mail->addAddress('ben.garside@bsigroup.com'); 
->>>>>>> origin/master
+
 
     $mail->isHTML(true); 
 
