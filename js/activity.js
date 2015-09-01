@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 var resCount = 0;
 
 function getInfo(buttonId) {
@@ -542,5 +543,4 @@ $(function(){
     $("#select_feed").change(function () {
         refreshTrackerTables();
     });
-
 });
