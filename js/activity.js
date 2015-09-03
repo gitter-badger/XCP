@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 var resCount = 0;
 
 function getInfo(buttonId) {
