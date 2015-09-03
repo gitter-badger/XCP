@@ -26,7 +26,7 @@
           <ul class="dropdown-menu">
             <li <?php echoActiveClassIfRequestMatches("flow"); ?>><a href="flow.php" ><i class="fa fa-random"></i> Manage Activity Flow</a></li>
             <li <?php echoActiveClassIfRequestMatches("actionmanager"); ?>><a href="actionmanager.php" ><i class="fa fa-table"></i> Action Manager</a></li>
-            <li <?php echoActiveClassIfRequestMatches("dumpAudit"); ?>><a href="dumpAudit.php"><i class="fa fa-download"></i> Dump Audit (NOT WORKING)</a></li>
+            <li <?php echoActiveClassIfRequestMatches("dumpAudit"); ?>><a href="dumpAudit.php"><i class="fa fa-download"></i> Dump Audit</a></li>
           </ul>
         </li>
         <li class="dropdown">
