@@ -136,6 +136,56 @@ function addRule(id, valueTo, valueFrom, assign, set, action) {
 	})
 }
 
+function addStage() {
+    var modal = $('#addModal');
+    var butSend = $('#dataModalsendButton');
+    var cancBut = $('#dataModalcancButton');
+    $('#dataModalError').hide()
+    modal.modal({
+        backdrop: 'static',
+        keyboard: false
+    })
+
+    cancBut.click(function() {
+        modal.modal('hide')
+        butSend.button('reset');
+        cancBut.unbind(); //Remove on click listener
+        butSend.unbind(); //Remove on click listener
+    })
+
+    butSend.click(function(event) {
+    	//get data
+    	var dataOut = [];
+    	$( '#addModal' ).find( 'input, textarea, select' ).each(function(index, value){
+    		id = $(value).attr('id');
+    		va = $(value).val();
+    		dataOut[id] = va;
+    	})
+    	console.log(dataOut);
+    	$.ajax({
+    		url: 'data/activity.mapping.update.php',
+    		data: {type: 'addStage', act: dataOut['act'], status: dataOut['status'], name: dataOut['Name'], description: dataOut['Description']},
+    	})
+    	.done(function( e ) {
+    		console.log("success");
+    		console.log( e );
+    		if(e == 'OK'){
+    			//GOOD, carry on. Close the modal and redirect to new stage
+    			window.location.href = window.location.href + "?stage=" + dataOut['act'] + "," + dataOut['status'];
+    		} else {
+    			// there was an error
+				$('#dataModalError').find('#errorText').text( e );
+				$('#dataModalError').fadeIn('slow');
+    		}
+    	})
+    	.fail(function() {
+    		console.log("error");
+    		// there was an error
+    	})
+    	
+    });
+}
+
 function update() {
 
     //Set updated values

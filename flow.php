@@ -4,15 +4,16 @@ if(!$user->isLoggedIn()){
     Redirect::to('login.php?nexturl=flow.php');
 }
 ?>
-<div class="page-header">
-<h1><span class="glyphicon glyphicon-random" aria-hidden="true"></span> Activity flow</h1>
-</div>
 <?php 
 if($stage = Input::get('stage')){
 	if(!$user->hasPermission('admin')){
 	    Redirect::to('flow.php');
 	}
-
+	?>
+	<div class="page-header">
+	<h1><span class="glyphicon glyphicon-random" aria-hidden="true"></span> Activity flow</h1>
+	</div>
+	<?php
 	// Show info fopr selected stage
 	$stageInfo = Activity::splitStage($stage, ',');
 	$act = $stageInfo['activity'];
@@ -159,6 +160,11 @@ if($stage = Input::get('stage')){
 	<?php
 } else {
 	// Show list of ACT and STAT
+	?>
+	<div class="page-header">
+	<h1><span class="glyphicon glyphicon-random" aria-hidden="true"></span> Activity flow <button type="button" onclick="addStage()" class="btn btn-primary"><i class="fa fw fa-plus"></i> Add stage</button></h1>
+	</div>
+	<?php
 	$stageInfo = Activity::showStages();
 	foreach ($stageInfo as $key => $value) {
 		echo '<h3>' . $key . ' - ' . $value['INFO']->SHORT_NAME . ' <small>' . $value['INFO']->DESCRIPTION . '</small></h3>';
@@ -166,13 +172,13 @@ if($stage = Input::get('stage')){
 		if($user->hasPermission('admin')){
 				$editHead = '<th class="col-md-1"></th>';
 			}
-		echo '<tr><th class="col-md-1">Stage</th><th class="col-md-2">Name</th><th class="col-md-6">Description</th>' . $editHead . '</tr></thead>';
+		echo '<tr><th class="col-md-1">Stage</th><th class="col-md-2">Name</th><th class="col-md-6">Description</th><th class="col-md-1"></th>' . $editHead . '</tr></thead>';
 		foreach ($value['STATUSES'] as $statusId => $statusVal) {
 			
 			if($user->hasPermission('admin')){
 				$edit = '<td class="col-md-1"><a href="?stage='. $statusVal->act . ',' . $statusVal->status .'">edit</a></td>';
 			}
-			echo '<tr><td class="col-md-1">' . $statusVal->act . ':' . $statusVal->status . '</td><td class="col-md-2">' . $statusVal->name . '</td><td class="col-md-5">' . $statusVal->description . '</td><td class="col-md-1">' . $ruleAllow . '</td>' . $edit . '</tr>';
+			echo '<tr><td class="col-md-1">' . $statusVal->act . ':' . $statusVal->status . '</td><td class="col-md-2">' . $statusVal->name . '</td><td class="col-md-6">' . $statusVal->description . '</td><td class="col-md-1">' . $ruleAllow . '</td>' . $edit . '</tr>';
 			unset($ruleAllow);
 		}
 		echo '</table>';
@@ -183,9 +189,9 @@ if($stage = Input::get('stage')){
 
 <div class="addRule" style="display: none;">
 	<div class="form-group" id="xx">
-	  <p class="col-sm-1" style="padding-top: 7px;"><span class="label label-default">xx</span></p>
+	  <p class="col-sm-2" style="padding-top: 7px;"><span class="label label-default">xx</span></p>
 	  <label class="control-label col-sm-1 " for="activity_xx">Destination</label>
-	  <div class="col-sm-1">
+	  <div class="col-sm-2">
 	  <select  class="form-control activity" id="activity_xx" >
 		<option  value="" disabled selected>Activity</option>
 		<?php
@@ -197,7 +203,7 @@ if($stage = Input::get('stage')){
 		  ?>
 	  </select>
 	  </div>			  
-	  <div class="col-sm-1">
+	  <div class="col-sm-2">
 	  <select type="text" class="form-control status" id="status_xx">
 		  <option class="status" value="" disabled selected>Status</option>
 			<?php
@@ -215,8 +221,8 @@ if($stage = Input::get('stage')){
 	  </div>
 	</div>
 	<div class="form-group">
-	  <label class="control-label col-sm-2 " for="action_xx">Action</label>
-	  <div class="col-sm-3">
+	  <label class="control-label col-sm-3 " for="action_xx">Action</label>
+	  <div class="col-sm-4">
 	  <select class="form-control action" id="action_xx" aria-describedby="inputSuccess2Status">
 	  	<option value="" selected >None</option>
 			<?php
@@ -230,7 +236,7 @@ if($stage = Input::get('stage')){
 	  </div>
 	</div>
 	<div class="form-group">
-		<div class="col-sm-offset-2 col-sm-10">
+		<div class="col-sm-offset-3 col-sm-10">
 			<div class="checkbox">
 				<label>
 				<input id="assign_xx" type="checkbox" value="" <?php if($rule['assign'] == 1){ echo " checked";} ;?>> Sticky assignment
@@ -239,7 +245,7 @@ if($stage = Input::get('stage')){
 		</div>
 	</div>
 	<div class="form-group">
-	  <label class="control-label col-sm-2 " for="inputSuccess2"></label>
+	  <label class="control-label col-sm-3 " for="inputSuccess2"></label>
 	  <div class="col-sm-4">
 	  	<button type="button" onclick="removeRule('addRule_xx')" class="btn btn-danger"><i class="fa fa-trash-o"></i> Delete</button>
 		<!--<button type="button" onclick="addRuleInput(yy)" class="btn btn-warning"><i class="fa fw fa-plus"></i> Add rule</button>-->
@@ -250,6 +256,58 @@ if($stage = Input::get('stage')){
 </div>
 
 <!-- clonable form END -->
+
+<!-- Modal -->
+<div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="addModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="dataModalLabel">Add new stage</h4>
+      </div>
+      <div class="modal-body">
+       <p><span id="dataModalIntro">Please enter the detals of the new stage here:</span></p><hr>
+        <div id="dataModalError" class="alert alert-danger alert-dismissible" role="alert">
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <strong><i class="fa fa-exclamation-triangle"></i> </strong><span id="errorText"></span>
+        </div>
+        <form>
+					<div class="form-group">
+				    <label for="act">Activity</label>
+				    <select class="form-control" id="act" >
+				    	<?php
+								foreach ($stageInfo as $key => $value) {
+									echo '<option value="'.$key.'">' . $key . ' - ' . $value['INFO']->SHORT_NAME . '</option>';
+								}
+				    	?>
+				    </select>
+				  </div>
+				  <div class="form-group">
+				    <label for="status">Status</label>
+				    <input class="form-control" id="status" type="number" list="statuses" min="00" max="99" step="1" placeholder="00">
+							<datalist id="statuses">
+							  <option value="00">
+							  <option value="02">
+							</datalist>
+				  </div>
+				  <div class="form-group">
+				    <label for="Name">Name</label>
+				    <input type="text" class="form-control" id="Name" placeholder="Name">
+				  </div>
+				  <div class="form-group">
+				    <label for="Description">Description</label>
+				    <textarea class="form-control" id="Description" ></textarea>
+				  </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" id="dataModalcancButton">Close</button>
+        <button type="sumbit" class="btn btn-primary" data-complete-text="Finished!" data-error-text="Error" id="dataModalsendButton">Add</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- END Modal -->
 <?php
 require_once('php/templates/footer.php');
 ?>

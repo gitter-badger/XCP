@@ -715,4 +715,20 @@ class Activity {
 		return $db->first()->action_id + 1;
 	}
 
+	public static function addStage($data) {
+			$db = DB::getInstance();
+
+			$sql = "SELECT * FROM ACT_STATUS_2 WHERE act = " . $data['act'] . " AND status = " . $data['status'];
+			$existanceCheck = $db->query($sql);
+			if($existanceCheck->count() == 0) {
+				if(!$db->insert('ACT_STATUS_2', $data)) {
+					throw new Exception($db->errorInfo()[2]);
+				}				
+			} else {
+				throw new Exception('Already exist.');
+			}
+
+	}
+
 }
+?>

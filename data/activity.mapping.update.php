@@ -43,8 +43,24 @@ switch ($type) {
 			print_r($e);
 		}
 		break;
+	case 'addStage':
+		$act = Input::get('act');
+		$status = Input::get('status');
+		$name = Input::get('name');
+		$description = Input::get('description');
+		$data = array( 'status' => str_pad($status,2,"0",STR_PAD_LEFT),
+						'act' => str_pad($act,2,"0",STR_PAD_LEFT),
+						'name' => $name,
+						'description' => $description
+					);
+		 try {
+		 	Activity::addStage($data);
+		 } catch (Exception $e) {
+		 	print_r($e);
+		 }
+		break;
 	default:
-		# code...
+		# code...q
 		break;
 }
 echo 'OK';
