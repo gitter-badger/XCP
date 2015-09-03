@@ -52,7 +52,7 @@ foreach ($stages_results as $value) {
   array_push($header, $value->STAGE . " - lastAllocatedUser");
 }
 
-$sql = "SELECT * FROM [dbo].maindata";
+$sql = "SELECT * FROM [dbo].maindata WHERE projectStatus = 'PUBL'";
 $data = $db->query($sql);                   
 $xcpItems = $data->results();
 
@@ -108,13 +108,11 @@ foreach ($xcpItems as $key => $value) {
 $objPHPExcel = new PHPExcel();
 
 // Set document properties
-$objPHPExcel->getProperties()->setCreator("Maarten Balliauw")
-               ->setLastModifiedBy("Maarten Balliauw")
-               ->setTitle("Office 2007 XLSX Test Document")
-               ->setSubject("Office 2007 XLSX Test Document")
-               ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
-               ->setKeywords("office 2007 openxml php")
-               ->setCategory("Test result file");
+$objPHPExcel->getProperties()->setCreator($user->data()->username)
+               ->setLastModifiedBy($user->data()->username)
+               ->setTitle($filename)
+               ->setSubject("")
+               ->setDescription("");
 
 
 // Add some data
@@ -141,7 +139,7 @@ $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setAutoSize(true);
 
 // Redirect output to a client’s web browser (Excel2007)
 header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-header('Content-Disposition: attachment;filename="01simple.xlsx"');
+header('Content-Disposition: attachment;filename="'.$filename .'.xlsx"');
 header('Cache-Control: max-age=0');
 // If you're serving to IE 9, then the following may be needed
 header('Cache-Control: max-age=1');
